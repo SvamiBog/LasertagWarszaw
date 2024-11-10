@@ -25,8 +25,10 @@ test:
 shell:
 	poetry run python manage.py shell
 
-# Команда для загрузки переменных окружения и проверки соединения с базой данных
-check-env:
-	@echo "SECRET_KEY=$$(grep DJANGO_SECRET_KEY $(ENV_FILE))"
-	@echo "DB_NAME=$$(grep DB_NAME $(ENV_FILE))"
-	@echo "DB_USER=$$(grep DB_USER $(ENV_FILE))"
+# Команда для создания файла с переводами (.pot)
+translations:
+	$(VENV) pybabel extract -F babel.cfg -o locale/messages.pot .
+
+# Команда для компиляции переводов (.mo)
+compile:
+	$(VENV) pybabel compile -d locale

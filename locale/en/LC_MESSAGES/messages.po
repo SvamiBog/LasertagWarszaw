@@ -1,0 +1,64 @@
+# English translations for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-11-10 17:18+0100\n"
+"PO-Revision-Date: 2024-11-10 17:18+0100\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.16.0\n"
+
+#: bot/telegram_bot.py:58
+msgid "Welcome to the Laser Tag Bot! You have selected {} language."
+msgstr ""
+
+#: bot/telegram_bot.py:68
+msgid "Register for the Game"
+msgstr ""
+
+#: bot/telegram_bot.py:69
+msgid "Unsubscribe from Notifications"
+msgstr ""
+
+#: bot/telegram_bot.py:72
+msgid "Please choose an option:"
+msgstr ""
+
+#: laser_tag_admin/views.py:18
+msgid "Welcome to the Bot Administration Panel!"
+msgstr ""
+
+#: laser_tag_admin/views.py:19
+msgid "Manage your bot users and settings easily."
+msgstr ""
+
+#: laser_tag_admin/views.py:20
+msgid "View Users"
+msgstr ""
+
+#: laser_tag_admin/views.py:29
+msgid "Authorization"
+msgstr ""
+
+#: laser_tag_admin/views.py:30
+msgid "Login"
+msgstr ""
+
+#: laser_tag_admin/views.py:32
+msgid "You are Logged in"
+msgstr ""
+
+#: laser_tag_admin/views.py:40
+msgid "You are logged out"
+msgstr ""
+

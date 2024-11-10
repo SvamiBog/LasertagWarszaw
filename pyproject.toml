@@ -26,6 +26,8 @@ django-bootstrap5 = "^24.3"
 pytz = "^2024.2"
 pytest = "^8.3.3"
 pytest-django = "^4.5.2"
+babel = "^2.16.0"
+nest-asyncio = "^1.6.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
