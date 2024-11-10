@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    {% load django_bootstrap5 %}
+    {% load i18n %}
+    {% bootstrap_css %}
+    <title>
+        {% block title %}
+        {% trans 'Панель управления ботом' %}
+        {% endblock %}
+    </title>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <header class="masthead">
+        {% include 'navbar.html' %}
+    </header>
+    <div class="container mt-4">
+        {% bootstrap_messages %}
+        {% block content %}
+        {% endblock %}
+    </div>
+    {% include "footer.html" %}
+    {% bootstrap_javascript %}
+</body>
+</html>
