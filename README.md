@@ -1,5 +1,8 @@
 # Laser Tag Game Management Bot
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/21949f746d0145bd3f6e/maintainability)](https://codeclimate.com/github/SvamiBog/LasertagWarszaw/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/21949f746d0145bd3f6e/test_coverage)](https://codeclimate.com/github/SvamiBog/LasertagWarszaw/test_coverage)
+
 Welcome to the **Laser Tag Game Management Bot** project! This comprehensive platform is designed to streamline the management of laser tag games, allowing administrators and players to interact seamlessly. Built with Django and Python, the platform integrates with Telegram to provide real-time notifications and game updates. This README will walk you through the purpose, key features, installation, and usage of the project.
 
 ## Table of Contents

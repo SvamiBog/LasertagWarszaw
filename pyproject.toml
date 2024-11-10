@@ -24,9 +24,13 @@ dj-database-url = "^2.3.0"
 python-dotenv = "^1.0.1"
 django-bootstrap5 = "^24.3"
 pytz = "^2024.2"
+pytest = "^8.3.3"
+pytest-django = "^4.5.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
+coverage = "^7.6.4"
+pytest-cov = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]
