@@ -8,4 +8,5 @@ urlpatterns = [
     path('logout/', UserLogoutView.as_view(), name='logout'),
     path('', IndexView.as_view(), name='index'),
     path('users/', include('laser_tag_admin.users.urls')),
+    path('games/', include('laser_tag_admin.games.urls')),
 ]

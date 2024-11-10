@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление игры{% endblock %}
+
+{% block content %}
+<h1>Подтверждение удаления игры</h1>
+<p>Вы уверены, что хотите удалить игру с датой {{ game.date }} и временем начала {{ game.start_time }}?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'game_list' %}" class="btn btn-secondary">Отмена</a>
+</form>
+{% endblock %}

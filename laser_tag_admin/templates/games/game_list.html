@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Список игр{% endblock %}
+
+{% block content %}
+<h1>Список игр</h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Дата</th>
+            <th>Время начала</th>
+            <th>Место проведения</th>
+            <th>Количество игроков</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for game in games %}
+        <tr>
+            <td>{{ game.id }}</td>
+            <td>{{ game.date }}</td>
+            <td>{{ game.start_time }}</td>
+            <td>{{ game.location }}</td>
+            <td>{{ game.players_count }}</td>
+            <td>{{ game.status_display }}</td>
+            <td>
+                <a href="{% url 'game_detail' game.id %}" class="btn btn-info btn-sm">Просмотр</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center">Игры не найдены</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

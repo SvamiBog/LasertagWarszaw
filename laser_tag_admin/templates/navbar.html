@@ -19,6 +19,9 @@
                         <a class="nav-link" href="{% url 'users_list' %}">Пользователи</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'game_list' %}">Игры</a>
+                    </li>
+                    <li class="nav-item">
                         <form method="post" action="{% url 'logout' %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-link nav-link">Выйти</button>

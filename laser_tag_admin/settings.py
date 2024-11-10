@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_bootstrap5',
     'laser_tag_admin.users',
+    'laser_tag_admin.games',
 ]
 
 MIDDLEWARE = [

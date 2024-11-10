@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Детали игры{% endblock %}
+
+{% block content %}
+<h1>Детали игры</h1>
+<p><strong>Дата:</strong> {{ game.date }}</p>
+<p><strong>Время начала:</strong> {{ game.start_time }}</p>
+<p><strong>Место проведения:</strong> {{ game.location }}</p>
+<p><strong>Количество записанных игроков:</strong> {{ game.players.count }}</p>
+<p><strong>Статус:</strong> {{ status }}</p>
+
+<h2>Записавшиеся игроки:</h2>
+<ul>
+    {% for player in game.players.all %}
+        <li>{{ player.name }} (ID: {{ player.telegram_id }})</li>
+    {% empty %}
+        <p>Пока нет записавшихся игроков.</p>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'game_edit' game.id %}" class="btn btn-warning">Редактировать</a>
+<a href="{% url 'game_delete' game.id %}" class="btn btn-danger">Удалить</a>
+<a href="{% url 'game_list' %}" class="btn btn-secondary">Назад к списку игр</a>
+{% endblock %}

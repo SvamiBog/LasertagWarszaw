@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавление игры{% endblock %}
+
+{% block content %}
+<h1>Добавление новой игры</h1>
+<form method="post" class="mt-3">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Создать</button>
+    <a href="{% url 'game_list' %}" class="btn btn-secondary">Назад к списку игр</a>
+</form>
+{% endblock %}
