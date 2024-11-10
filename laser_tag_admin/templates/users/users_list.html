@@ -10,9 +10,11 @@
             <th>ID</th>
             <th>Имя</th>
             <th>Фамилия</th>
+            <th>Имя пользователя</th>
             <th>Номер телефона</th>
-            <th>Количество игр</th>
-            <th>Подписан на чат</th>
+            <th>Язык</th>
+            <th>Уведомления</th>
+            <th>Дата регистрации</th>
             <th>Действия</th>
         </tr>
     </thead>
@@ -22,9 +24,11 @@
             <td>{{ user.telegram_id }}</td>
             <td>{{ user.first_name }}</td>
             <td>{{ user.last_name }}</td>
+            <td>{{ user.username }}</td>
             <td>{{ user.phone_number }}</td>
-            <td>{{ user.games_played }}</td>
-            <td>{{ user.subscribed_to_chat|yesno:"Да,Нет" }}</td>
+            <td>{{ user.language }}</td>
+            <td>{{ user.notifications_enabled|yesno:"Да,Нет" }}</td>
+            <td>{{ user.registration_date|date:"d.m.Y H:i" }}</td>
             <td>
                 <a href="{% url 'user_edit' user.telegram_id %}" class="btn btn-sm btn-warning">Редактировать</a>
                 <a href="{% url 'user_delete' user.telegram_id %}" class="btn btn-sm btn-danger">Удалить</a>
@@ -32,7 +36,7 @@
         </tr>
         {% empty %}
         <tr>
-            <td colspan="7" class="text-center">Пользователи не найдены</td>
+            <td colspan="9" class="text-center">Пользователи не найдены</td>
         </tr>
         {% endfor %}
     </tbody>

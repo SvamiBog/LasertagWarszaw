@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-10 17:18+0100\n"
+"POT-Creation-Date: 2024-11-10 23:55+0100\n"
 "PO-Revision-Date: 2024-11-10 17:18+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: uk\n"
@@ -19,19 +19,33 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: bot/telegram_bot.py:58
-msgid "Welcome to the Laser Tag Bot! You have selected {} language."
+#: bot/telegram_bot.py:108
+msgid "Welcome to the Laser Tag Bot! You have selected the {} language."
 msgstr "Ласкаво просимо до бота Laser Tag! Ви обрали мову: {}."
 
-#: bot/telegram_bot.py:68
+#: bot/telegram_bot.py:117
+msgid "Share your phone number"
+msgstr "Поділіться своїм номером телефону"
+
+#: bot/telegram_bot.py:123
+msgid "Please share your phone number so we can register you."
+msgstr ""
+"Будь ласка, поділіться своїм номером телефону, щоб ми могли вас "
+"зареєструвати."
+
+#: bot/telegram_bot.py:138
+msgid "Thank you for sharing your phone number! You are now registered."
+msgstr "Дякуємо, що поділилися своїм номером телефону! Ви тепер зареєстровані."
+
+#: bot/telegram_bot.py:149
 msgid "Register for the Game"
 msgstr "Зареєструватися на гру"
 
-#: bot/telegram_bot.py:69
+#: bot/telegram_bot.py:150
 msgid "Unsubscribe from Notifications"
 msgstr "Відмовитися від сповіщень"
 
-#: bot/telegram_bot.py:72
+#: bot/telegram_bot.py:155
 msgid "Please choose an option:"
 msgstr "Будь ласка, оберіть варіант:"
 
