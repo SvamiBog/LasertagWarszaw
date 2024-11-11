@@ -32,13 +32,5 @@ async def send_admin_settings_menu(update, context: CallbackContext, _) -> None:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    query = update.callback_query
-
-    # Удаление предыдущего сообщения, если возможно
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    except Exception as e:
-        logging.warning(f"Не удалось удалить сообщение: {e}")
-
     # Отправляем сообщение с кнопками меню настроек администратора
     await context.bot.send_message(chat_id=update.effective_chat.id, text=_('Admin Settings menu:'), reply_markup=reply_markup)

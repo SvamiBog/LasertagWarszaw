@@ -75,6 +75,33 @@ def update_user_language(user_id, language):
 def update_user_phone_number(user_id, phone_number):
     User.objects.filter(telegram_id=user_id).update(phone_number=phone_number)
 
+
+def get_language_keyboard():
+    """
+    Возвращает клавиатуру с кнопками выбора языка.
+    """
+    keyboard = [
+        [InlineKeyboardButton('Беларуская', callback_data='lang_be')],
+        [InlineKeyboardButton('Українська', callback_data='lang_uk')],
+        [InlineKeyboardButton('Polski', callback_data='lang_pl')],
+        [InlineKeyboardButton('English', callback_data='lang_en')],
+        [InlineKeyboardButton('Русский', callback_data='lang_ru')],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+async def show_language_selection(update: Update, context: CallbackContext, _) -> None:
+    """
+    Отображает меню для выбора языка.
+    """
+    reply_markup = get_language_keyboard()
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=_('Please choose your preferred language:'),
+        reply_markup=reply_markup
+    )
+
+
 # Обработчик команды /start, выводит пользователю выбор языка
 async def start(update: Update, context: CallbackContext) -> None:
     user_id = update.effective_chat.id  # Получаем ID пользователя
@@ -88,18 +115,10 @@ async def start(update: Update, context: CallbackContext) -> None:
         update.effective_user.username
     )
 
-    # Создаем кнопки для выбора языка
-    keyboard = [
-        [InlineKeyboardButton('Беларуская', callback_data='lang_be')],
-        [InlineKeyboardButton('Українська', callback_data='lang_uk')],
-        [InlineKeyboardButton('Polski', callback_data='lang_pl')],
-        [InlineKeyboardButton('English', callback_data='lang_en')],
-        [InlineKeyboardButton('Русский', callback_data='lang_ru')],
-    ]
-
     # Отправляем сообщение с кнопками выбора языка
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    reply_markup = get_language_keyboard()
     await update.message.reply_text('Choose your language / Выберите язык:', reply_markup=reply_markup)
+
 
 # Обработчик выбора языка, сохраняет выбранный язык и обновляет запись пользователя
 async def language_choice(update: Update, context: CallbackContext) -> None:
@@ -200,27 +219,35 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
     """
     Обработчик для кнопок, который перенаправляет на нужные функции.
     """
+
     query = update.callback_query
     user_id = query.message.chat.id
     _ = langs[user_lang.get(user_id, 'en')].gettext
+
+    # Удаление предыдущего сообщения, если возможно
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    except Exception as e:
+        logging.warning(f"Не удалось удалить сообщение: {e}")
 
     # Получаем пользователя из базы данных
     user = await sync_to_async(User.objects.get)(telegram_id=user_id)
 
     if query.data == 'settings':
-        logging.info(f"Пользователь {user_id} нажал на кнопку настроек.")  # Логирование
-        # Проверка на администратора
         if user.is_admin:
             await send_admin_settings_menu(update, context, _)
-            logging.info(f"Отправлено меню настроек администратора для пользователя {user_id}.")  # Логирование
         else:
             await send_user_settings_menu(update, context, _)
-            logging.info(f"Отправлено меню настроек пользователя для пользователя {user_id}.")  # Логирование
-        await query.answer()  # Ответ на callback для Telegram
+        await query.answer()
+
+    elif query.data == 'change_language':
+        await show_language_selection(update, context, _)
+        await query.answer()
 
     elif query.data == 'main_menu':
         await send_main_menu(update, context, _)
         await query.answer()
+
 
 
 # Основная функция запуска бота
