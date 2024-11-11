@@ -35,3 +35,27 @@ async def send_user_settings_menu(update, context: CallbackContext, _) -> None:
 
     # Отправляем сообщение с кнопками меню настроек пользователя
     await context.bot.send_message(chat_id=update.effective_chat.id, text=_('User Settings menu:'), reply_markup=reply_markup)
+
+
+async def handle_user_game_interaction(update, context, _, user, game):
+    """
+    Обрабатывает взаимодействие с игрой для пользователя.
+    """
+    query = update.callback_query
+
+    # Формируем сообщение для пользователя
+    message = _('Game Details:\n')
+    message += f"{game.date.strftime('%d.%m.%y')} - {game.start_time.strftime('%H:%M')}\n"
+    message += _('You can register or unregister from this game.')
+
+    # Кнопки для пользователя
+    keyboard = [
+        [InlineKeyboardButton(_('Register for Game'), callback_data=f'register_{game.id}')],
+        [InlineKeyboardButton(_('Unregister from Game'), callback_data=f'unregister_{game.id}')],
+        [InlineKeyboardButton(_('View Participants'), callback_data=f'view_{game.id}')],
+        [InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await query.edit_message_text(text=message, reply_markup=reply_markup)
+    await query.answer()

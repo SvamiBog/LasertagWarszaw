@@ -4,13 +4,14 @@ import django
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
-from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu
-from bot.user.user_handlers import send_user_menu, send_user_settings_menu
+from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu, handle_admin_game_interaction
+from bot.user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction
+from bot.core.menu_utils import get_language_keyboard, show_language_selection
+from bot.core.database_utils import get_or_create_user, update_user_phone_number, update_user_language, get_upcoming_games
 from dotenv import load_dotenv
 from asgiref.sync import sync_to_async
 import nest_asyncio
 import asyncio
-from django.utils import timezone
 
 
 # Настройка логирования
@@ -19,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'laser_tag_admin.settings')
 django.setup()
 from laser_tag_admin.users.models import User
+from laser_tag_admin.games.models import Game
 
 
 nest_asyncio.apply()  # Применяем патч для устранения проблем с вложенными вызовами asyncio
@@ -48,58 +50,6 @@ langs = {
 
 # Словарь для хранения выбранного языка пользователей
 user_lang = {}
-
-# Асинхронная функция для создания или получения пользователя в базе данных
-@sync_to_async
-def get_or_create_user(user_id, first_name, last_name, username):
-    # Проверяем, существует ли пользователь с данным ID, если нет, создаем нового
-    return User.objects.get_or_create(
-        telegram_id=user_id,
-        defaults={
-            'first_name': first_name,
-            'last_name': last_name,
-            'username': username,
-            'language': 'en',
-            'registration_date': timezone.now(),  # Записываем текущую дату и время
-            'notifications_enabled': True  # Уведомления включены по умолчанию
-        }
-    )
-
-# Асинхронная функция для обновления языка пользователя в базе данных
-@sync_to_async
-def update_user_language(user_id, language):
-    User.objects.filter(telegram_id=user_id).update(language=language)
-
-# Асинхронная функция для обновления номера телефона пользователя в базе данных
-@sync_to_async
-def update_user_phone_number(user_id, phone_number):
-    User.objects.filter(telegram_id=user_id).update(phone_number=phone_number)
-
-
-def get_language_keyboard():
-    """
-    Возвращает клавиатуру с кнопками выбора языка.
-    """
-    keyboard = [
-        [InlineKeyboardButton('Беларуская', callback_data='lang_be')],
-        [InlineKeyboardButton('Українська', callback_data='lang_uk')],
-        [InlineKeyboardButton('Polski', callback_data='lang_pl')],
-        [InlineKeyboardButton('English', callback_data='lang_en')],
-        [InlineKeyboardButton('Русский', callback_data='lang_ru')],
-    ]
-    return InlineKeyboardMarkup(keyboard)
-
-
-async def show_language_selection(update: Update, context: CallbackContext, _) -> None:
-    """
-    Отображает меню для выбора языка.
-    """
-    reply_markup = get_language_keyboard()
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=_('Please choose your preferred language:'),
-        reply_markup=reply_markup
-    )
 
 
 # Обработчик команды /start, выводит пользователю выбор языка
@@ -194,6 +144,38 @@ async def phone_number_received(update: Update, context: CallbackContext) -> Non
     await send_main_menu(update, context, _)
 
 
+async def show_upcoming_games(update: Update, context: CallbackContext, _) -> None:
+    """
+    Отправляет администратору или пользователю список предстоящих игр в виде кнопок.
+    """
+    # Получаем предстоящие игры из базы данных
+    upcoming_games = await get_upcoming_games()
+
+    if upcoming_games:
+        keyboard = []
+        for game in upcoming_games:
+            game_datetime = f"{game.date.strftime('%d.%m.%y')} - {game.start_time.strftime('%H:%M')}"
+            button_text = game_datetime
+            callback_data = f"game_{game.id}"  # Используем уникальный идентификатор игры для callback_data
+            keyboard.append([InlineKeyboardButton(button_text, callback_data=callback_data)])
+
+        # Добавляем кнопку возврата в меню
+        keyboard.append([InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=_('Upcoming games (click to interact):'),
+            reply_markup=reply_markup
+        )
+    else:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=_('No upcoming games found.'),
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]])
+        )
+
+
 async def send_main_menu(update, context: CallbackContext, _) -> None:
     """
     Определяет, какое меню отправить пользователю: администраторское или пользовательское.
@@ -248,6 +230,19 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
         await send_main_menu(update, context, _)
         await query.answer()
 
+    elif query.data == 'game_calendar':
+        await show_upcoming_games(update, context, _)
+        await query.answer()
+
+    elif query.data.startswith('game_'):
+        game_id = int(query.data.split('_')[1])
+        game = await sync_to_async(Game.objects.get)(id=game_id)
+
+        if user.is_admin:
+            await handle_admin_game_interaction(update, context, _, user, game)
+        else:
+            await handle_user_game_interaction(update, context, _, user, game)
+        await query.answer()
 
 
 # Основная функция запуска бота
