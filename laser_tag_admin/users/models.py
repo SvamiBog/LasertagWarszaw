@@ -14,6 +14,7 @@ class User(models.Model):
     language = models.CharField(max_length=10, default='en', verbose_name="Язык")
     notifications_enabled = models.BooleanField(default=True, verbose_name="Уведомления включены")
     registration_date = models.DateTimeField(default=timezone.now, verbose_name="Дата регистрации")
+    is_admin = models.BooleanField(default=False, verbose_name="Администратор")
 
     class Meta:
         verbose_name = "Пользователь"

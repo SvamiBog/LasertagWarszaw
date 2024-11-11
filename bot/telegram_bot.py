@@ -1,8 +1,11 @@
 import os
 import gettext
 import django
+import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
+from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu
+from bot.user.user_handlers import send_user_menu, send_user_settings_menu
 from dotenv import load_dotenv
 from asgiref.sync import sync_to_async
 import nest_asyncio
@@ -10,10 +13,13 @@ import asyncio
 from django.utils import timezone
 
 
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'laser_tag_admin.settings')
 django.setup()
-
 from laser_tag_admin.users.models import User
+
 
 nest_asyncio.apply()  # Применяем патч для устранения проблем с вложенными вызовами asyncio
 
@@ -97,28 +103,44 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 # Обработчик выбора языка, сохраняет выбранный язык и обновляет запись пользователя
 async def language_choice(update: Update, context: CallbackContext) -> None:
-    query = update.callback_query  # Получаем callback query (ответ пользователя)
-    user_id = query.message.chat.id  # Получаем ID пользователя
+    """
+    Обработчик выбора языка, сохраняет выбранный язык и обновляет запись пользователя.
+    """
+    query = update.callback_query
+    user_id = query.message.chat.id
 
-    if query.data.startswith('lang_'):  # Проверяем, начинается ли data с 'lang_'
-        selected_lang = query.data.split('_')[1]  # Получаем выбранный язык
-        user_lang[user_id] = selected_lang  # Сохраняем выбранный язык для пользователя
+    if query.data.startswith('lang_'):
+        selected_lang = query.data.split('_')[1]
+        user_lang[user_id] = selected_lang
+        langs[selected_lang].install()  # Устанавливаем gettext на нужный язык
+        _ = langs[selected_lang].gettext
 
         # Обновляем язык пользователя в базе данных
         await update_user_language(user_id, selected_lang)
 
-        # Явно загружаем перевод для конкретного языка пользователя
-        user_translation = langs[selected_lang]  # Получаем объект переводов для выбранного языка
-        _ = user_translation.gettext  # Получаем функцию для перевода
+        # Отправляем приветственное сообщение после выбора языка
+        """await query.answer()
+        welcome_message = _('Language has been updated. You have selected the {} language.').format(selected_lang)
+        await query.edit_message_text(text=welcome_message)"""
 
-        # Отправляем приветственное сообщение на выбранном языке
-        await query.answer()
-        full_language_name = LANG_NAMES.get(selected_lang, selected_lang)
-        translated_message = _('Welcome to the Laser Tag Bot! You have selected the {} language.').format(full_language_name)
-        await query.edit_message_text(text=translated_message)
+        # Проверка наличия номера телефона и запрос его только при необходимости
+        await check_and_request_phone_number(user_id, update, context, _)
 
-        # Запрашиваем номер телефона
+        # Всегда показываем основное меню после обновления языка
+        await send_main_menu(update, context, _)
+
+
+async def check_and_request_phone_number(user_id, update: Update, context: CallbackContext, _) -> None:
+    """
+    Проверяет, есть ли номер телефона в базе данных, и запрашивает его, если отсутствует.
+    """
+    # Получаем пользователя из базы данных
+    user = await sync_to_async(User.objects.get)(telegram_id=user_id)
+
+    if not user.phone_number:  # Проверяем, отсутствует ли номер телефона
+        # Запрашиваем номер телефона, если он отсутствует
         await request_phone_number(update, context, _)
+
 
 # Запрашивает у пользователя номер телефона после выбора языка
 async def request_phone_number(update: Update, context: CallbackContext, _) -> None:
@@ -132,6 +154,7 @@ async def request_phone_number(update: Update, context: CallbackContext, _) -> N
         text=_('Please share your phone number so we can register you.'),
         reply_markup=reply_markup
     )
+
 
 # Обработчик получения номера телефона от пользователя
 async def phone_number_received(update: Update, context: CallbackContext) -> None:
@@ -151,18 +174,54 @@ async def phone_number_received(update: Update, context: CallbackContext) -> Non
     # Переход к основному меню
     await send_main_menu(update, context, _)
 
-# Отправляет основное меню пользователю после регистрации
-async def send_main_menu(update: Update, context: CallbackContext, _) -> None:
-    # Создаем кнопки для основного меню
-    keyboard = [
-        [InlineKeyboardButton(_('Register for the Game'), callback_data='register_game')],
-        [InlineKeyboardButton(_('Unsubscribe from Notifications'), callback_data='unsubscribe')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Отправляем сообщение с кнопками основного меню
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=_('Please choose an option:'),
-                                   reply_markup=reply_markup)
+async def send_main_menu(update, context: CallbackContext, _) -> None:
+    """
+    Определяет, какое меню отправить пользователю: администраторское или пользовательское.
+    """
+    query = update.callback_query
+
+    # Удаление предыдущего сообщения, если возможно
+    try:
+        await context.bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
+    except Exception as e:
+        logging.warning(f"Не удалось удалить сообщение: {e}")
+
+    user_id = update.effective_chat.id
+    user = await sync_to_async(User.objects.get)(telegram_id=user_id)
+
+    if user.is_admin:
+        await send_admin_menu(update, context, _)
+    else:
+        await send_user_menu(update, context, _)
+
+
+async def button_handler(update: Update, context: CallbackContext) -> None:
+    """
+    Обработчик для кнопок, который перенаправляет на нужные функции.
+    """
+    query = update.callback_query
+    user_id = query.message.chat.id
+    _ = langs[user_lang.get(user_id, 'en')].gettext
+
+    # Получаем пользователя из базы данных
+    user = await sync_to_async(User.objects.get)(telegram_id=user_id)
+
+    if query.data == 'settings':
+        logging.info(f"Пользователь {user_id} нажал на кнопку настроек.")  # Логирование
+        # Проверка на администратора
+        if user.is_admin:
+            await send_admin_settings_menu(update, context, _)
+            logging.info(f"Отправлено меню настроек администратора для пользователя {user_id}.")  # Логирование
+        else:
+            await send_user_settings_menu(update, context, _)
+            logging.info(f"Отправлено меню настроек пользователя для пользователя {user_id}.")  # Логирование
+        await query.answer()  # Ответ на callback для Telegram
+
+    elif query.data == 'main_menu':
+        await send_main_menu(update, context, _)
+        await query.answer()
+
 
 # Основная функция запуска бота
 async def main() -> None:
@@ -171,6 +230,7 @@ async def main() -> None:
     # Добавляем обработчики команд и callback
     application.add_handler(CommandHandler("start", start))  # Обработчик команды /start
     application.add_handler(CallbackQueryHandler(language_choice, pattern='^lang_.*$'))  # Обработчик выбора языка
+    application.add_handler(CallbackQueryHandler(button_handler))  # Обработчик для всех остальных callback кнопок
     application.add_handler(MessageHandler(filters.CONTACT, phone_number_received))  # Обработчик получения номера телефона
 
     # Запускаем бот в режиме polling (опрос сервера)
