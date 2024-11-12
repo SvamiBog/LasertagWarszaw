@@ -3,7 +3,7 @@ name = "telegram-bot"
 version = "0.1.0"
 description = "Telegram bot for laser tag game"
 authors = ["Maksim Rubanets"]
-readme = ""
+readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
