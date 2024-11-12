@@ -5,6 +5,9 @@ ENV_FILE=.env
 install:
 	poetry install
 
+run-bot:
+	python bot/telegram_bot.py
+
 # Команда для запуска сервера разработки
 run:
 	poetry run python manage.py runserver

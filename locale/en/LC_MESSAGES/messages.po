@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-10 23:55+0100\n"
+"POT-Creation-Date: 2024-11-12 20:51+0100\n"
 "PO-Revision-Date: 2024-11-10 17:18+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,32 +18,199 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: bot/telegram_bot.py:108
-msgid "Welcome to the Laser Tag Bot! You have selected the {} language."
+#: bot/telegram_bot.py:91
+msgid "Language has been updated. You have selected the {} language."
 msgstr ""
 
-#: bot/telegram_bot.py:117
+#: bot/telegram_bot.py:119
 msgid "Share your phone number"
 msgstr ""
 
-#: bot/telegram_bot.py:123
+#: bot/telegram_bot.py:125
 msgid "Please share your phone number so we can register you."
 msgstr ""
 
-#: bot/telegram_bot.py:138
-msgid "Thank you for sharing your phone number! You are now registered."
+#: bot/admin/admin_handlers.py:37 bot/admin/admin_handlers.py:58
+#: bot/telegram_bot.py:160 bot/telegram_bot.py:176 bot/telegram_bot.py:181
+#: bot/user/user_handlers.py:39 bot/user/user_handlers.py:63
+#: bot/user/user_handlers.py:93 bot/user/user_handlers.py:134
+#: bot/user/user_handlers.py:161
+msgid "Main Menu"
 msgstr ""
 
-#: bot/telegram_bot.py:149
-msgid "Register for the Game"
+#: bot/telegram_bot.py:165 bot/telegram_bot.py:170
+msgid "Upcoming games (click to interact):"
 msgstr ""
 
-#: bot/telegram_bot.py:150
-msgid "Unsubscribe from Notifications"
+#: bot/telegram_bot.py:174
+msgid "No upcoming games found."
 msgstr ""
 
-#: bot/telegram_bot.py:155
-msgid "Please choose an option:"
+#: bot/telegram_bot.py:248
+msgid "Invalid game information."
+msgstr ""
+
+#: bot/telegram_bot.py:269
+msgid "Please enter the message you want to broadcast to all users:"
+msgstr ""
+
+#: bot/telegram_bot.py:291
+msgid "Error during registration."
+msgstr ""
+
+#: bot/telegram_bot.py:301
+msgid "Error during unregistration."
+msgstr ""
+
+#: bot/admin/admin_handlers.py:17 bot/user/user_handlers.py:17
+msgid "Game Calendar"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:18
+msgid "Broadcast Message"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:19 bot/user/user_handlers.py:19
+msgid "Settings"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:24 bot/admin/admin_handlers.py:26
+msgid "Admin Menu:"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:36 bot/user/user_handlers.py:38
+msgid "Change Language"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:41
+msgid "Admin Settings Menu:"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:48 bot/user/user_handlers.py:115
+msgid "Game Details:\n"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:49 bot/admin/admin_handlers.py:77
+#: bot/user/user_handlers.py:116
+msgid "Date"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:50 bot/admin/admin_handlers.py:78
+#: bot/user/user_handlers.py:117
+msgid "Start Time"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:51 bot/admin/admin_handlers.py:79
+#: bot/user/user_handlers.py:118
+msgid "Location"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:52 bot/user/user_handlers.py:119
+msgid "Players count: "
+msgstr ""
+
+#: bot/admin/admin_handlers.py:56
+msgid "Send Announcement"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:57
+msgid "Back to Game List"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:76
+msgid "Announcement for upcoming game:\n"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:92
+msgid "Announcement sent to subscribed users.\n"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:93
+msgid "Success"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:94
+msgid "Failed"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:98
+msgid "View Game Details"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:99
+msgid "Close"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:132
+msgid "Broadcast sent successfully to all subscribed users."
+msgstr ""
+
+#: bot/core/menu_utils.py:22 bot/core/menu_utils.py:26
+msgid "Please choose your preferred language:"
+msgstr ""
+
+#: bot/user/user_handlers.py:18
+msgid "My Game Registrations"
+msgstr ""
+
+#: bot/user/user_handlers.py:24 bot/user/user_handlers.py:26
+msgid "User Menu:"
+msgstr ""
+
+#: bot/user/user_handlers.py:37
+msgid "Subscription Status"
+msgstr ""
+
+#: bot/user/user_handlers.py:45 bot/user/user_handlers.py:47
+msgid "User Settings menu:"
+msgstr ""
+
+#: bot/user/user_handlers.py:56 bot/user/user_handlers.py:87
+msgid "Enabled"
+msgstr ""
+
+#: bot/user/user_handlers.py:56 bot/user/user_handlers.py:87
+msgid "Disabled"
+msgstr ""
+
+#: bot/user/user_handlers.py:58 bot/user/user_handlers.py:88
+msgid "Subscription status"
+msgstr ""
+
+#: bot/user/user_handlers.py:62 bot/user/user_handlers.py:92
+msgid "Toggle Subscription"
+msgstr ""
+
+#: bot/user/user_handlers.py:71
+msgid "No changes were made to the message."
+msgstr ""
+
+#: bot/user/user_handlers.py:99
+msgid "Subscription status updated."
+msgstr ""
+
+#: bot/user/user_handlers.py:120
+msgid "Participants List"
+msgstr ""
+
+#: bot/user/user_handlers.py:128
+msgid "No participants yet."
+msgstr ""
+
+#: bot/user/user_handlers.py:132
+msgid "Register for Game"
+msgstr ""
+
+#: bot/user/user_handlers.py:133
+msgid "Unregister from Game"
+msgstr ""
+
+#: bot/user/user_handlers.py:165
+msgid "Your registered games:"
+msgstr ""
+
+#: bot/user/user_handlers.py:170
+msgid "You have no game registrations."
 msgstr ""
 
 #: laser_tag_admin/views.py:18
@@ -73,7 +240,3 @@ msgstr ""
 #: laser_tag_admin/views.py:40
 msgid "You are logged out"
 msgstr ""
-
-#~ msgid "Welcome to the Laser Tag Bot! You have selected {} language."
-#~ msgstr ""
-

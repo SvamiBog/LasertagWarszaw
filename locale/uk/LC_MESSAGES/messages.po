@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-10 23:55+0100\n"
+"POT-Creation-Date: 2024-11-12 20:51+0100\n"
 "PO-Revision-Date: 2024-11-10 17:18+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: uk\n"
@@ -19,35 +19,200 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.16.0\n"
 
-#: bot/telegram_bot.py:108
-msgid "Welcome to the Laser Tag Bot! You have selected the {} language."
-msgstr "Ласкаво просимо до бота Laser Tag! Ви обрали мову: {}."
+#: bot/telegram_bot.py:91
+msgid "Language has been updated. You have selected the {} language."
+msgstr "Мову було оновлено. Ви обрали мову: {}."
 
-#: bot/telegram_bot.py:117
+#: bot/telegram_bot.py:119
 msgid "Share your phone number"
 msgstr "Поділіться своїм номером телефону"
 
-#: bot/telegram_bot.py:123
+#: bot/telegram_bot.py:125
 msgid "Please share your phone number so we can register you."
-msgstr ""
-"Будь ласка, поділіться своїм номером телефону, щоб ми могли вас "
-"зареєструвати."
+msgstr "Будь ласка, поділіться своїм номером телефону, щоб ми могли вас зареєструвати."
 
-#: bot/telegram_bot.py:138
-msgid "Thank you for sharing your phone number! You are now registered."
-msgstr "Дякуємо, що поділилися своїм номером телефону! Ви тепер зареєстровані."
+#: bot/admin/admin_handlers.py:37 bot/admin/admin_handlers.py:58
+#: bot/telegram_bot.py:160 bot/telegram_bot.py:176 bot/telegram_bot.py:181
+#: bot/user/user_handlers.py:39 bot/user/user_handlers.py:63
+#: bot/user/user_handlers.py:93 bot/user/user_handlers.py:134
+#: bot/user/user_handlers.py:161
+msgid "Main Menu"
+msgstr "Головне меню"
 
-#: bot/telegram_bot.py:149
-msgid "Register for the Game"
+#: bot/telegram_bot.py:165 bot/telegram_bot.py:170
+msgid "Upcoming games (click to interact):"
+msgstr "Майбутні ігри (натисніть для взаємодії):"
+
+#: bot/telegram_bot.py:174
+msgid "No upcoming games found."
+msgstr "Майбутні ігри не знайдено."
+
+#: bot/telegram_bot.py:248
+msgid "Invalid game information."
+msgstr "Недійсна інформація про гру."
+
+#: bot/telegram_bot.py:269
+msgid "Please enter the message you want to broadcast to all users:"
+msgstr "Будь ласка, введіть повідомлення, яке ви хочете надіслати всім користувачам:"
+
+#: bot/telegram_bot.py:291
+msgid "Error during registration."
+msgstr "Помилка під час реєстрації."
+
+#: bot/telegram_bot.py:301
+msgid "Error during unregistration."
+msgstr "Помилка під час скасування реєстрації."
+
+#: bot/admin/admin_handlers.py:17 bot/user/user_handlers.py:17
+msgid "Game Calendar"
+msgstr "Календар ігор"
+
+#: bot/admin/admin_handlers.py:18
+msgid "Broadcast Message"
+msgstr "Розіслати повідомлення"
+
+#: bot/admin/admin_handlers.py:19 bot/user/user_handlers.py:19
+msgid "Settings"
+msgstr "Налаштування"
+
+#: bot/admin/admin_handlers.py:24 bot/admin/admin_handlers.py:26
+msgid "Admin Menu:"
+msgstr "Меню адміністратора:"
+
+#: bot/admin/admin_handlers.py:36 bot/user/user_handlers.py:38
+msgid "Change Language"
+msgstr "Змінити мову"
+
+#: bot/admin/admin_handlers.py:41
+msgid "Admin Settings Menu:"
+msgstr "Меню налаштувань адміністратора:"
+
+#: bot/admin/admin_handlers.py:48 bot/user/user_handlers.py:115
+msgid "Game Details:\n"
+msgstr "Деталі гри:\n"
+
+#: bot/admin/admin_handlers.py:49 bot/admin/admin_handlers.py:77
+#: bot/user/user_handlers.py:116
+msgid "Date"
+msgstr "Дата"
+
+#: bot/admin/admin_handlers.py:50 bot/admin/admin_handlers.py:78
+#: bot/user/user_handlers.py:117
+msgid "Start Time"
+msgstr "Час початку"
+
+#: bot/admin/admin_handlers.py:51 bot/admin/admin_handlers.py:79
+#: bot/user/user_handlers.py:118
+msgid "Location"
+msgstr "Місце проведення"
+
+#: bot/admin/admin_handlers.py:52 bot/user/user_handlers.py:119
+msgid "Players count: "
+msgstr "Кількість гравців:"
+
+#: bot/admin/admin_handlers.py:56
+msgid "Send Announcement"
+msgstr "Надіслати оголошення"
+
+#: bot/admin/admin_handlers.py:57
+msgid "Back to Game List"
+msgstr "Повернутися до списку ігор"
+
+#: bot/admin/admin_handlers.py:76
+msgid "Announcement for upcoming game:\n"
+msgstr "Оголошення про майбутню гру:\n"
+
+#: bot/admin/admin_handlers.py:92
+msgid "Announcement sent to subscribed users.\n"
+msgstr "Оголошення надіслано підписаним користувачам.\n"
+
+#: bot/admin/admin_handlers.py:93
+msgid "Success"
+msgstr "Успішно"
+
+#: bot/admin/admin_handlers.py:94
+msgid "Failed"
+msgstr "Не вдалося"
+
+#: bot/admin/admin_handlers.py:98
+msgid "View Game Details"
+msgstr "Переглянути деталі гри"
+
+#: bot/admin/admin_handlers.py:99
+msgid "Close"
+msgstr "Закрити"
+
+#: bot/admin/admin_handlers.py:132
+msgid "Broadcast sent successfully to all subscribed users."
+msgstr "Повідомлення успішно надіслано всім підписаним користувачам."
+
+#: bot/core/menu_utils.py:22 bot/core/menu_utils.py:26
+msgid "Please choose your preferred language:"
+msgstr "Будь ласка, оберіть бажану мову:"
+
+#: bot/user/user_handlers.py:18
+msgid "My Game Registrations"
+msgstr "Мої реєстрації на ігри"
+
+#: bot/user/user_handlers.py:24 bot/user/user_handlers.py:26
+msgid "User Menu:"
+msgstr "Меню користувача:"
+
+#: bot/user/user_handlers.py:37
+msgid "Subscription Status"
+msgstr "Статус підписки"
+
+#: bot/user/user_handlers.py:45 bot/user/user_handlers.py:47
+msgid "User Settings menu:"
+msgstr "Меню налаштувань користувача:"
+
+#: bot/user/user_handlers.py:56 bot/user/user_handlers.py:87
+msgid "Enabled"
+msgstr "Увімкнено"
+
+#: bot/user/user_handlers.py:56 bot/user/user_handlers.py:87
+msgid "Disabled"
+msgstr "Вимкнено"
+
+#: bot/user/user_handlers.py:58 bot/user/user_handlers.py:88
+msgid "Subscription status"
+msgstr "Статус підписки"
+
+#: bot/user/user_handlers.py:62 bot/user/user_handlers.py:92
+msgid "Toggle Subscription"
+msgstr "Змінити статус підписки"
+
+#: bot/user/user_handlers.py:71
+msgid "No changes were made to the message."
+msgstr "Зміни до повідомлення не внесено."
+
+#: bot/user/user_handlers.py:99
+msgid "Subscription status updated."
+msgstr "Статус підписки оновлено."
+
+#: bot/user/user_handlers.py:120
+msgid "Participants List"
+msgstr "Список учасників"
+
+#: bot/user/user_handlers.py:128
+msgid "No participants yet."
+msgstr "Поки немає учасників."
+
+#: bot/user/user_handlers.py:132
+msgid "Register for Game"
 msgstr "Зареєструватися на гру"
 
-#: bot/telegram_bot.py:150
-msgid "Unsubscribe from Notifications"
-msgstr "Відмовитися від сповіщень"
+#: bot/user/user_handlers.py:133
+msgid "Unregister from Game"
+msgstr "Скасувати реєстрацію на гру"
 
-#: bot/telegram_bot.py:155
-msgid "Please choose an option:"
-msgstr "Будь ласка, оберіть варіант:"
+#: bot/user/user_handlers.py:165
+msgid "Your registered games:"
+msgstr "Ваші зареєстровані ігри:"
+
+#: bot/user/user_handlers.py:170
+msgid "You have no game registrations."
+msgstr "У вас немає реєстрацій на ігри."
 
 #: laser_tag_admin/views.py:18
 msgid "Welcome to the Bot Administration Panel!"
@@ -76,4 +241,3 @@ msgstr "Ви увійшли в систему"
 #: laser_tag_admin/views.py:40
 msgid "You are logged out"
 msgstr "Ви вийшли з системи"
-
