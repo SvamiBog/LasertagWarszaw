@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 from asgiref.sync import sync_to_async
-from bot.core.database_utils import get_user_by_telegram_id, save_user, get_game_registrations, get_user_registrations
+from bot.core.database_utils import get_user_by_telegram_id, save_user, get_game_registrations, get_user_registrations, get_total_players_count_for_game
 import logging
 
 
@@ -116,7 +116,7 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
     message += f"{_('Date')}: {game.date.strftime('%d.%m.%y')}\n"
     message += f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n"
     message += f"{_('Location')}: {game.location}\n"
-    message += _('Players count: ') + str(await game.get_total_players_count()) + '\n'
+    message += _('Players count: ') + str(await get_total_players_count_for_game(game)) + '\n'
     message += f"\n{_('Participants List')}:\n"
 
     if registrations:

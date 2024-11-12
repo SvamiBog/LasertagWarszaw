@@ -2,7 +2,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from telegram import Update
 import logging
-from bot.core.database_utils import get_users_for_announcement, get_users_for_broadcast
+from bot.core.database_utils import get_users_for_announcement, get_users_for_broadcast, get_total_players_count_for_game
 
 
 # Настройка логирования
@@ -49,7 +49,7 @@ async def handle_admin_game_interaction(update, context, _, user, game, query=No
     message += f"{_('Date')}: {game.date.strftime('%d.%m.%Y')}\n"
     message += f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n"
     message += f"{_('Location')}: {game.location}\n"
-    message += _('Players count: ') + str(await game.get_total_players_count()) + '\n'
+    message += _('Players count: ') + str(await get_total_players_count_for_game(game)) + '\n'
 
     # Кнопки для администратора
     keyboard = [

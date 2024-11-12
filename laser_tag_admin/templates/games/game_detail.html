@@ -7,17 +7,19 @@
 <p><strong>Дата:</strong> {{ game.date }}</p>
 <p><strong>Время начала:</strong> {{ game.start_time }}</p>
 <p><strong>Место проведения:</strong> {{ game.location }}</p>
-<p><strong>Количество записанных игроков:</strong> {{ game.players.count }}</p>
-<p><strong>Статус:</strong> {{ status }}</p>
+<p><strong>Количество записанных игроков:</strong> {{ total_players_count }}</p>
+<p><strong>Статус:</strong> {{ game.get_status_display }}</p>
 
 <h2>Записавшиеся игроки:</h2>
-<ul>
-    {% for player in game.players.all %}
-        <li>{{ player.name }} (ID: {{ player.telegram_id }})</li>
-    {% empty %}
-        <p>Пока нет записавшихся игроков.</p>
-    {% endfor %}
-</ul>
+{% if registrations %}
+    <ul>
+        {% for reg in registrations %}
+            <li>{{ reg.user.first_name }} {{ reg.user.last_name }} (Гости: {{ reg.guests_count }})</li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Пока нет записавшихся игроков.</p>
+{% endif %}
 
 <a href="{% url 'game_edit' game.id %}" class="btn btn-warning">Редактировать</a>
 <a href="{% url 'game_delete' game.id %}" class="btn btn-danger">Удалить</a>

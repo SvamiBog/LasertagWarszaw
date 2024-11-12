@@ -15,6 +15,7 @@ class GameListView(LoginRequiredMixin, ListView):
             game.status_display = game.get_status_display()
         return games
 
+
 class GameDetailView(LoginRequiredMixin, DetailView):
     model = Game
     template_name = 'games/game_detail.html'
@@ -22,7 +23,10 @@ class GameDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['status'] = self.object.get_status_display()
+        game = self.object
+        context['status'] = game.get_status_display()
+        context['registrations'] = game.registrations.select_related('user').all()
+        context['total_players_count'] = game.get_total_players_count()
         return context
 
 

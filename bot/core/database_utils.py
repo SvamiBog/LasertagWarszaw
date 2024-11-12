@@ -130,3 +130,12 @@ def get_user_registrations(user):
     """
     return list(GameRegistration.objects.filter(user=user))
 
+
+@sync_to_async
+def get_total_players_count_for_game(game):
+    """
+    Асинхронный метод для получения общего количества игроков, включая гостей, для заданной игры.
+    """
+    registrations = GameRegistration.objects.filter(game=game)
+    total_count = sum(1 + reg.guests_count for reg in registrations)
+    return total_count

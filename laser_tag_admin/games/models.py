@@ -13,12 +13,11 @@ class Game(models.Model):
     def __str__(self):
         return f"Игра {self.id} - {self.date} {self.start_time}"
 
-    async def get_total_players_count(self):
+    def get_total_players_count(self):
         """
         Возвращает общее количество игроков, включая гостей.
         """
-        registrations = await sync_to_async(list)(self.registrations.all())
-        total_count = sum(1 + reg.guests_count for reg in registrations)
+        total_count = sum(1 + reg.guests_count for reg in self.registrations.all())
         return total_count
 
     def get_status_display(self):
