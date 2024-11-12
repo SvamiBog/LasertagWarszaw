@@ -1,4 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import CallbackContext
 
 def get_language_keyboard():
     keyboard = [
@@ -10,10 +11,18 @@ def get_language_keyboard():
     ]
     return InlineKeyboardMarkup(keyboard)
 
-async def show_language_selection(update, context, _):
+
+async def show_language_selection(update, context: CallbackContext, _, query=None) -> None:
+    """
+    Отображает меню для выбора языка. Если передан query, редактирует существующее сообщение.
+    """
     reply_markup = get_language_keyboard()
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=_('Please choose your preferred language:'),
-        reply_markup=reply_markup
-    )
+
+    if query:
+        await query.edit_message_text(text=_('Please choose your preferred language:'), reply_markup=reply_markup)
+    else:
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=_('Please choose your preferred language:'),
+            reply_markup=reply_markup
+        )

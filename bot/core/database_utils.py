@@ -26,13 +26,16 @@ def get_or_create_user(user_id, first_name, last_name, username):
         }
     )
 
+
 @sync_to_async
 def update_user_language(user_id, language):
     User.objects.filter(telegram_id=user_id).update(language=language)
 
+
 @sync_to_async
 def update_user_phone_number(user_id, phone_number):
     User.objects.filter(telegram_id=user_id).update(phone_number=phone_number)
+
 
 @sync_to_async
 def get_upcoming_games():
@@ -45,3 +48,38 @@ def get_upcoming_games():
         start_time__gt=current_datetime.time()
     )
     return list(upcoming_games)
+
+
+@sync_to_async
+def get_users_for_announcement():
+    """
+    Получает список пользователей, которые подписаны на рассылку игр.
+    """
+    return list(User.objects.filter(notifications_enabled=True))  # Возвращаем список для избежания проблем в async
+
+
+@sync_to_async
+def get_users_for_broadcast():
+    """
+    Возвращает всех пользователей, которые подписаны на уведомления.
+    """
+    return list(User.objects.all())
+
+
+from asgiref.sync import sync_to_async
+from laser_tag_admin.users.models import User
+
+@sync_to_async
+def get_user_by_telegram_id(user_id):
+    """
+    Асинхронно получает пользователя по telegram_id.
+    """
+    return User.objects.get(telegram_id=user_id)
+
+
+@sync_to_async
+def save_user(user):
+    """
+    Асинхронно сохраняет изменения в объекте пользователя.
+    """
+    user.save()

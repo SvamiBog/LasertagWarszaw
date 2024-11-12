@@ -1,5 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
+from bot.core.database_utils import get_user_by_telegram_id, save_user
 import logging
 
 
@@ -7,9 +8,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
-async def send_user_menu(update, context: CallbackContext, _) -> None:
+async def send_user_menu(update, context: CallbackContext, _, query=None) -> None:
     """
-    Отправляет меню пользователя.
+    Отправляет меню пользователя. Если передан query, редактирует существующее сообщение.
     """
     keyboard = [
         [InlineKeyboardButton(_('Game Calendar'), callback_data='game_calendar')],
@@ -17,31 +18,94 @@ async def send_user_menu(update, context: CallbackContext, _) -> None:
         [InlineKeyboardButton(_('Settings'), callback_data='settings')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=_('User Menu:'), reply_markup=reply_markup)
+
+    if query:
+        await query.edit_message_text(text=_('User Menu:'), reply_markup=reply_markup)
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=_('User Menu:'), reply_markup=reply_markup)
 
 
-async def send_user_settings_menu(update, context: CallbackContext, _) -> None:
+async def send_user_settings_menu(update, context: CallbackContext, _, query=None) -> None:
     """
     Отправляет меню настроек для пользователя.
     """
     logging.info("Функция send_user_settings_menu вызвана.")  # Логирование
+
     # Создаем кнопки для меню настроек пользователя
     keyboard = [
+        [InlineKeyboardButton(_('Subscription Status'), callback_data='subscription_status')],
         [InlineKeyboardButton(_('Change Language'), callback_data='change_language')],
-        [InlineKeyboardButton(_('Unsubscribe from Game Notifications'), callback_data='unsubscribe')],
         [InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    # Отправляем сообщение с кнопками меню настроек пользователя
-    await context.bot.send_message(chat_id=update.effective_chat.id, text=_('User Settings menu:'), reply_markup=reply_markup)
+    # Если передан query, редактируем сообщение, иначе отправляем новое сообщение
+    if query:
+        await query.edit_message_text(text=_('User Settings menu:'), reply_markup=reply_markup)
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=_('User Settings menu:'), reply_markup=reply_markup)
 
 
-async def handle_user_game_interaction(update, context, _, user, game):
+async def show_subscription_status(update, context: CallbackContext, _, query) -> None:
+    """
+    Отображает статус подписки пользователя с возможностью переключения.
+    """
+    user_id = update.effective_chat.id
+    user = await get_user_by_telegram_id(user_id)
+    subscription_status = _('Enabled') if user.notifications_enabled else _('Disabled')
+
+    status_message = f"{_('Subscription status')}: {subscription_status}"
+
+    # Кнопки для переключения статуса и возврата в меню
+    keyboard = [
+        [InlineKeyboardButton(_('Toggle Subscription'), callback_data='toggle_subscription')],
+        [InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Проверка, чтобы избежать ошибки "Message is not modified"
+    if query.message.text != status_message:
+        await query.edit_message_text(text=status_message, reply_markup=reply_markup)
+    else:
+        await query.answer(_('No changes were made to the message.'))
+
+
+# Обработчик для переключения подписки
+async def toggle_subscription(update, context: CallbackContext, _) -> None:
+    """
+    Переключает статус подписки пользователя и отображает обновленный статус.
+    """
+    user_id = update.effective_chat.id
+    user = await get_user_by_telegram_id(user_id)
+
+    # Переключаем статус подписки
+    user.notifications_enabled = not user.notifications_enabled
+    await save_user(user)  # Сохраняем изменения в базе данных
+
+    # Определяем новый статус подписки
+    subscription_status = _('Enabled') if user.notifications_enabled else _('Disabled')
+    status_message = f"{_('Subscription status')}: {subscription_status}"
+
+    # Кнопки для переключения статуса и возврата в меню
+    keyboard = [
+        [InlineKeyboardButton(_('Toggle Subscription'), callback_data='toggle_subscription')],
+        [InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    query = update.callback_query
+    await query.edit_message_text(text=status_message, reply_markup=reply_markup)
+    await query.answer(_('Subscription status updated.'))
+
+
+
+
+async def handle_user_game_interaction(update, context, _, user, game, query=None):
     """
     Обрабатывает взаимодействие с игрой для пользователя.
     """
-    query = update.callback_query
+    if query is None:
+        query = update.callback_query
 
     # Формируем сообщение для пользователя
     message = _('Game Details:\n')
@@ -57,5 +121,9 @@ async def handle_user_game_interaction(update, context, _, user, game):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    await query.edit_message_text(text=message, reply_markup=reply_markup)
+    if query:
+        await query.edit_message_text(text=message, reply_markup=reply_markup)
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup)
+
     await query.answer()

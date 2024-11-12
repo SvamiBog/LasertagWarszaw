@@ -4,8 +4,8 @@ import django
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
-from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu, handle_admin_game_interaction
-from bot.user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction
+from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu, handle_admin_game_interaction, send_announcement, broadcast_message_handler
+from bot.user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction, show_subscription_status, toggle_subscription
 from bot.core.menu_utils import get_language_keyboard, show_language_selection
 from bot.core.database_utils import get_or_create_user, update_user_phone_number, update_user_language, get_upcoming_games
 from dotenv import load_dotenv
@@ -87,16 +87,18 @@ async def language_choice(update: Update, context: CallbackContext) -> None:
         # Обновляем язык пользователя в базе данных
         await update_user_language(user_id, selected_lang)
 
-        # Отправляем приветственное сообщение после выбора языка
-        """await query.answer()
+        # Формируем приветственное сообщение
         welcome_message = _('Language has been updated. You have selected the {} language.').format(selected_lang)
-        await query.edit_message_text(text=welcome_message)"""
+
+        # Редактируем предыдущее сообщение с приветственным сообщением
+        await query.edit_message_text(text=welcome_message)
 
         # Проверка наличия номера телефона и запрос его только при необходимости
         await check_and_request_phone_number(user_id, update, context, _)
 
-        # Всегда показываем основное меню после обновления языка
-        await send_main_menu(update, context, _)
+        # Переход к основному меню после обновления языка
+        await send_main_menu(update, context, _, query)
+
 
 
 async def check_and_request_phone_number(user_id, update: Update, context: CallbackContext, _) -> None:
@@ -134,19 +136,14 @@ async def phone_number_received(update: Update, context: CallbackContext) -> Non
     # Обновляем номер телефона пользователя в базе данных
     await update_user_phone_number(user_id, user_phone_number)
 
-    # Отправляем сообщение об успешной регистрации
-    await update.message.reply_text(
-        _('Thank you for sharing your phone number! You are now registered.'),
-        reply_markup=ReplyKeyboardRemove()  # Убираем клавиатуру
-    )
-
     # Переход к основному меню
     await send_main_menu(update, context, _)
 
 
-async def show_upcoming_games(update: Update, context: CallbackContext, _) -> None:
+async def show_upcoming_games(update: Update, context: CallbackContext, _, query=None) -> None:
     """
     Отправляет администратору или пользователю список предстоящих игр в виде кнопок.
+    Если передан query, редактирует существующее сообщение.
     """
     # Получаем предстоящие игры из базы данных
     upcoming_games = await get_upcoming_games()
@@ -163,85 +160,118 @@ async def show_upcoming_games(update: Update, context: CallbackContext, _) -> No
         keyboard.append([InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=_('Upcoming games (click to interact):'),
-            reply_markup=reply_markup
-        )
+        if query:
+            # Редактируем существующее сообщение
+            await query.edit_message_text(text=_('Upcoming games (click to interact):'), reply_markup=reply_markup)
+        else:
+            # Отправляем новое сообщение, если query не передан
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=_('Upcoming games (click to interact):'),
+                reply_markup=reply_markup
+            )
     else:
-        await context.bot.send_message(
-            chat_id=update.effective_chat.id,
-            text=_('No upcoming games found.'),
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]])
-        )
+        no_games_message = _('No upcoming games found.')
+        if query:
+            await query.edit_message_text(text=no_games_message, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]]))
+        else:
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=no_games_message,
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]])
+            )
 
 
-async def send_main_menu(update, context: CallbackContext, _) -> None:
+async def send_main_menu(update, context: CallbackContext, _, query=None) -> None:
     """
     Определяет, какое меню отправить пользователю: администраторское или пользовательское.
+    Если передан query, изменяет предыдущее сообщение.
     """
-    query = update.callback_query
-
-    # Удаление предыдущего сообщения, если возможно
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    except Exception as e:
-        logging.warning(f"Не удалось удалить сообщение: {e}")
-
     user_id = update.effective_chat.id
     user = await sync_to_async(User.objects.get)(telegram_id=user_id)
 
+    # Формируем меню для пользователя или администратора
     if user.is_admin:
-        await send_admin_menu(update, context, _)
+        await send_admin_menu(update, context, _, query)
     else:
-        await send_user_menu(update, context, _)
+        await send_user_menu(update, context, _, query)
 
 
 async def button_handler(update: Update, context: CallbackContext) -> None:
     """
     Обработчик для кнопок, который перенаправляет на нужные функции.
     """
-
     query = update.callback_query
     user_id = query.message.chat.id
     _ = langs[user_lang.get(user_id, 'en')].gettext
-
-    # Удаление предыдущего сообщения, если возможно
-    try:
-        await context.bot.delete_message(chat_id=query.message.chat.id, message_id=query.message.message_id)
-    except Exception as e:
-        logging.warning(f"Не удалось удалить сообщение: {e}")
 
     # Получаем пользователя из базы данных
     user = await sync_to_async(User.objects.get)(telegram_id=user_id)
 
     if query.data == 'settings':
         if user.is_admin:
-            await send_admin_settings_menu(update, context, _)
+            await send_admin_settings_menu(update, context, _, query)
         else:
-            await send_user_settings_menu(update, context, _)
+            await send_user_settings_menu(update, context, _, query)
         await query.answer()
 
     elif query.data == 'change_language':
-        await show_language_selection(update, context, _)
+        await show_language_selection(update, context, _, query)
         await query.answer()
 
     elif query.data == 'main_menu':
-        await send_main_menu(update, context, _)
+        await send_main_menu(update, context, _, query)
         await query.answer()
 
     elif query.data == 'game_calendar':
-        await show_upcoming_games(update, context, _)
+        await show_upcoming_games(update, context, _, query)
         await query.answer()
+
+    elif query.data.startswith('announce_'):
+        game_id = int(query.data.split('_')[1])
+        game = await sync_to_async(Game.objects.get)(id=game_id)
+        await send_announcement(update, context, game, _, query)
+        await query.answer()
+
+    elif query.data.startswith('game_info_'):
+        try:
+            # Извлекаем ID игры, который идёт после 'game_info_'
+            game_id = int(query.data.split('_')[-1])  # Берём последний элемент после разбиения по '_'
+            game = await sync_to_async(Game.objects.get)(id=game_id)
+            await handle_admin_game_interaction(update, context, _, user, game, query)
+        except (ValueError, IndexError) as e:
+            logging.error(f"Ошибка при обработке game_info: {e}")
+            await query.answer(_('Invalid game information.'), show_alert=True)
 
     elif query.data.startswith('game_'):
         game_id = int(query.data.split('_')[1])
         game = await sync_to_async(Game.objects.get)(id=game_id)
 
         if user.is_admin:
-            await handle_admin_game_interaction(update, context, _, user, game)
+            await handle_admin_game_interaction(update, context, _, user, game, query)
         else:
-            await handle_user_game_interaction(update, context, _, user, game)
+            await handle_user_game_interaction(update, context, _, user, game, query)
+        await query.answer()
+
+    elif query.data == 'close_message':
+        await query.delete_message()  # Удаляет сообщение с кнопками
+        await query.answer()
+
+    elif query.data == 'broadcast_message':
+        if user.is_admin:
+            await context.bot.send_message(
+                chat_id=user_id,
+                text=_('Please enter the message you want to broadcast to all users:')
+            )
+            context.user_data['awaiting_broadcast_message'] = True
+            await query.answer()
+
+    elif query.data == 'subscription_status':
+        await show_subscription_status(update, context, _, query)
+        await query.answer()
+
+    elif query.data == 'toggle_subscription':
+        await toggle_subscription(update, context, _)
         await query.answer()
 
 
@@ -251,6 +281,7 @@ async def main() -> None:
 
     # Добавляем обработчики команд и callback
     application.add_handler(CommandHandler("start", start))  # Обработчик команды /start
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, lambda update, context: broadcast_message_handler(update, context, langs[user_lang.get(update.effective_chat.id, 'en')].gettext))) # Обработчик сообщений
     application.add_handler(CallbackQueryHandler(language_choice, pattern='^lang_.*$'))  # Обработчик выбора языка
     application.add_handler(CallbackQueryHandler(button_handler))  # Обработчик для всех остальных callback кнопок
     application.add_handler(MessageHandler(filters.CONTACT, phone_number_received))  # Обработчик получения номера телефона
