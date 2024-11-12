@@ -5,9 +5,9 @@ import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
 from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu, handle_admin_game_interaction, send_announcement, broadcast_message_handler
-from bot.user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction, show_subscription_status, toggle_subscription
+from bot.user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction, show_subscription_status, toggle_subscription, show_user_game_registrations
 from bot.core.menu_utils import get_language_keyboard, show_language_selection
-from bot.core.database_utils import get_or_create_user, update_user_phone_number, update_user_language, get_upcoming_games
+from bot.core.database_utils import get_or_create_user, update_user_phone_number, update_user_language, get_upcoming_games, register_user_for_game, unregister_user_from_game
 from dotenv import load_dotenv
 from asgiref.sync import sync_to_async
 import nest_asyncio
@@ -238,10 +238,15 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
             # Извлекаем ID игры, который идёт после 'game_info_'
             game_id = int(query.data.split('_')[-1])  # Берём последний элемент после разбиения по '_'
             game = await sync_to_async(Game.objects.get)(id=game_id)
-            await handle_admin_game_interaction(update, context, _, user, game, query)
-        except (ValueError, IndexError) as e:
+            # Проверяем, является ли пользователь администратором или нет
+            if user.is_admin:
+                await handle_admin_game_interaction(update, context, _, user, game, query)
+            else:
+                await handle_user_game_interaction(update, context, _, user, game, query)
+        except (ValueError, IndexError, Game.DoesNotExist) as e:
             logging.error(f"Ошибка при обработке game_info: {e}")
             await query.answer(_('Invalid game information.'), show_alert=True)
+
 
     elif query.data.startswith('game_'):
         game_id = int(query.data.split('_')[1])
@@ -273,6 +278,31 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
     elif query.data == 'toggle_subscription':
         await toggle_subscription(update, context, _)
         await query.answer()
+
+        # Обработка кнопок регистрации и отмены регистрации
+    elif query.data.startswith('register_'):
+        try:
+            game_id = int(query.data.split('_')[1])
+            game = await sync_to_async(Game.objects.get)(id=game_id)
+            guests_count = await register_user_for_game(user, game)
+            await handle_user_game_interaction(update, context, _, user, game, query)
+        except (ValueError, Game.DoesNotExist) as e:
+            logging.error(f"Ошибка при регистрации на игру: {e}")
+            await query.answer(_('Error during registration.'), show_alert=True)
+
+    elif query.data.startswith('unregister_'):
+        try:
+            game_id = int(query.data.split('_')[1])
+            game = await sync_to_async(Game.objects.get)(id=game_id)
+            guests_count = await unregister_user_from_game(user, game)
+            await handle_user_game_interaction(update, context, _, user, game, query)
+        except (ValueError, Game.DoesNotExist) as e:
+            logging.error(f"Ошибка при отмене регистрации на игру: {e}")
+            await query.answer(_('Error during unregistration.'), show_alert=True)
+
+
+    elif query.data == 'my_game_registrations':
+        await show_user_game_registrations(update, context, user, _)
 
 
 # Основная функция запуска бота

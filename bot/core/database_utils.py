@@ -9,6 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'laser_tag_admin.settings')
 django.setup()
 from laser_tag_admin.users.models import User
 from laser_tag_admin.games.models import Game
+from laser_tag_admin.games.models import GameRegistration
 
 
 @sync_to_async
@@ -66,9 +67,6 @@ def get_users_for_broadcast():
     return list(User.objects.all())
 
 
-from asgiref.sync import sync_to_async
-from laser_tag_admin.users.models import User
-
 @sync_to_async
 def get_user_by_telegram_id(user_id):
     """
@@ -83,3 +81,52 @@ def save_user(user):
     Асинхронно сохраняет изменения в объекте пользователя.
     """
     user.save()
+
+
+@sync_to_async
+def register_user_for_game(user, game):
+    registration, created = GameRegistration.objects.get_or_create(user=user, game=game)
+    if not created:
+        registration.guests_count += 1
+    registration.save()
+    return registration.guests_count
+
+
+@sync_to_async
+def unregister_user_from_game(user, game):
+    try:
+        registration = GameRegistration.objects.get(user=user, game=game)
+        if registration.guests_count > 0:
+            registration.guests_count -= 1
+            registration.save()
+            return registration.guests_count
+        else:
+            registration.delete()
+            return 0
+    except GameRegistration.DoesNotExist:
+        return None
+
+
+@sync_to_async
+def get_game_registrations(game):
+    """
+    Возвращает список регистраций для указанной игры.
+    """
+    return list(GameRegistration.objects.filter(game=game))
+
+
+@sync_to_async
+def get_user_game_registrations(user):
+    """
+    Возвращает список игр, на которые пользователь зарегистрирован.
+    """
+    return list(GameRegistration.objects.filter(user=user).select_related('game'))
+
+
+@sync_to_async
+def get_user_registrations(user):
+    """
+    Возвращает список регистраций пользователя.
+    """
+    return list(GameRegistration.objects.filter(user=user))
+

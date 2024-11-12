@@ -1,6 +1,7 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
-from bot.core.database_utils import get_user_by_telegram_id, save_user
+from asgiref.sync import sync_to_async
+from bot.core.database_utils import get_user_by_telegram_id, save_user, get_game_registrations, get_user_registrations
 import logging
 
 
@@ -102,21 +103,34 @@ async def toggle_subscription(update, context: CallbackContext, _) -> None:
 
 async def handle_user_game_interaction(update, context, _, user, game, query=None):
     """
-    Обрабатывает взаимодействие с игрой для пользователя.
+    Обрабатывает взаимодействие с игрой для пользователя, отображает список участников.
     """
     if query is None:
         query = update.callback_query
 
-    # Формируем сообщение для пользователя
-    message = _('Game Details:\n')
-    message += f"{game.date.strftime('%d.%m.%y')} - {game.start_time.strftime('%H:%M')}\n"
-    message += _('You can register or unregister from this game.')
+    # Получаем список регистраций для данной игры
+    registrations = await get_game_registrations(game)
 
-    # Кнопки для пользователя
+    # Формируем сообщение с деталями игры и участниками
+    message = _('Game Details:\n')
+    message += f"{_('Date')}: {game.date.strftime('%d.%m.%y')}\n"
+    message += f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n"
+    message += f"{_('Location')}: {game.location}\n"
+    message += _('Players count: ') + str(await game.get_total_players_count()) + '\n'
+    message += f"\n{_('Participants List')}:\n"
+
+    if registrations:
+        for reg in registrations:
+            # Получаем связанные данные пользователя с использованием sync_to_async
+            reg_user = await sync_to_async(lambda: reg.user)()
+            message += f"- {reg_user.first_name} {reg_user.last_name} (Guests: {reg.guests_count})\n"
+    else:
+        message += _('No participants yet.')
+
+    # Кнопки для регистрации и отмены регистрации
     keyboard = [
         [InlineKeyboardButton(_('Register for Game'), callback_data=f'register_{game.id}')],
         [InlineKeyboardButton(_('Unregister from Game'), callback_data=f'unregister_{game.id}')],
-        [InlineKeyboardButton(_('View Participants'), callback_data=f'view_{game.id}')],
         [InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -127,3 +141,32 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup)
 
     await query.answer()
+
+
+async def show_user_game_registrations(update, context, user, _):
+    """
+    Отображает список игр, на которые пользователь записан, с кнопками.
+    """
+    registrations = await get_user_registrations(user)
+
+    if registrations:
+        keyboard = []
+        for reg in registrations:
+            game = await sync_to_async(lambda: reg.game)()  # Убедитесь, что доступ к game осуществляется асинхронно
+            button_text = f"{game.date.strftime('%d.%m.%Y')} {game.start_time.strftime('%H:%M')}"
+            callback_data = f"game_info_{game.id}"
+            keyboard.append([InlineKeyboardButton(button_text, callback_data=callback_data)])
+
+        # Добавляем кнопку для возврата в главное меню
+        keyboard.append([InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')])
+        reply_markup = InlineKeyboardMarkup(keyboard)
+
+        await update.callback_query.edit_message_text(
+            text=_('Your registered games:'),
+            reply_markup=reply_markup
+        )
+    else:
+        await update.callback_query.answer(
+            text=_('You have no game registrations.'),
+            show_alert=True
+        )
