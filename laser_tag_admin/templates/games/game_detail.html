@@ -4,8 +4,8 @@
 
 {% block content %}
 <h1>Детали игры</h1>
-<p><strong>Дата:</strong> {{ game.date }}</p>
-<p><strong>Время начала:</strong> {{ game.start_time }}</p>
+<p><strong>Дата:</strong> {{ game.date|date:"d.m.Y" }}</p>
+<p><strong>Время начала:</strong> {{ game.start_time|time:"H:i" }}</p>
 <p><strong>Место проведения:</strong> {{ game.location }}</p>
 <p><strong>Количество записанных игроков:</strong> {{ total_players_count }}</p>
 <p><strong>Статус:</strong> {{ game.get_status_display }}</p>

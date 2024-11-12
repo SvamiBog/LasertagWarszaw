@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils import timezone
 from laser_tag_admin.users.models import User
-from asgiref.sync import sync_to_async
 import pytz
 
 
