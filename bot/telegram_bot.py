@@ -4,10 +4,10 @@ import django
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
-from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu, handle_admin_game_interaction, send_announcement, broadcast_message_handler
-from bot.user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction, show_subscription_status, toggle_subscription, show_user_game_registrations
-from bot.core.menu_utils import get_language_keyboard, show_language_selection
-from bot.core.database_utils import get_or_create_user, update_user_phone_number, update_user_language, get_upcoming_games, register_user_for_game, unregister_user_from_game
+from .admin.admin_handlers import send_admin_menu, send_admin_settings_menu, handle_admin_game_interaction, send_announcement, broadcast_message_handler
+from .user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction, show_subscription_status, toggle_subscription, show_user_game_registrations
+from .core.menu_utils import get_language_keyboard, show_language_selection
+from .core.database_utils import get_or_create_user, update_user_phone_number, update_user_language, get_upcoming_games, register_user_for_game, unregister_user_from_game
 from dotenv import load_dotenv
 from asgiref.sync import sync_to_async
 import nest_asyncio
