@@ -93,7 +93,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'laser_tag_admin.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
