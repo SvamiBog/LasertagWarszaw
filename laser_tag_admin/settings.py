@@ -41,7 +41,7 @@ SECRET_KEY = 'django-insecure-39=50s#jo3aq^858&1kxui1^ja9fulxtvpn0!$-39e#-4wu^c(
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://lasertagwarszaw-production.up.railway.app']
+CSRF_TRUSTED_ORIGINS = ['https://lasertagwarszaw-production.up.railway.app', 'https://*.railway.app']
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
