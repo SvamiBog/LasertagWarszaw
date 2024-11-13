@@ -1,19 +1,31 @@
+# Используем официальный образ Python
 FROM python:3.12-slim
 
-ENV PYTHONUNBUFFERED 1
-ENV POETRY_VERSION=1.5.1
+# Устанавливаем переменные окружения
+ENV PYTHONUNBUFFERED=1
 
+# Устанавливаем рабочую директорию
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y supervisor
-
+# Копируем файлы зависимостей
 COPY pyproject.toml poetry.lock ./
-RUN pip install --upgrade pip && pip install "poetry==$POETRY_VERSION"
-RUN poetry config virtualenvs.create false && poetry install --no-root
 
+# Устанавливаем Poetry и зависимости
+RUN pip install --upgrade pip && pip install poetry
+RUN poetry config virtualenvs.create false
+RUN poetry install --no-interaction --no-ansi
+
+# Копируем весь проект
 COPY . .
-COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 
-EXPOSE $PORT
+# Собираем статические файлы
+RUN python manage.py collectstatic --noinput
 
-CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisor.conf"]
+# Применяем миграции базы данных
+RUN python manage.py migrate --noinput
+
+# Открываем порт 8000
+EXPOSE 8000
+
+# Запускаем приложение с Gunicorn
+CMD ["gunicorn", "laser_tag_admin.wsgi:application", "--bind", "0.0.0.0:8000"]
