@@ -21,6 +21,9 @@ from bot.core.database_utils import (
     get_or_create_user,
     update_user_phone_number,
     update_user_language,
+    unregister_user_from_game,
+    register_user_for_game,
+    get_total_players_count_for_game,
     get_closest_game)
 from dotenv import load_dotenv
 from asgiref.sync import sync_to_async
@@ -245,12 +248,27 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
         await toggle_subscription(update, context, _)
         await query.answer()
 
-        # Обработка кнопок регистрации и отмены регистрации
+    # Обработка кнопок регистрации и отмены регистрации
     elif query.data.startswith('register_'):
         try:
             game_id = int(query.data.split('_')[1])
             game = await sync_to_async(Game.objects.get)(id=game_id)
-            await handle_user_game_interaction(update, context, _, user, game, query)
+
+            # Регистрируем пользователя для игры и получаем обновленное количество игроков
+            await register_user_for_game(user, game)
+
+            # Создаем новый текст с учетом обновленных данных
+            current_text = query.message.text
+            new_text = _('Game Details:\n') + f"{_('Date')}: {game.date.strftime('%d.%m.%Y')}\n" + \
+                       f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n" + \
+                       f"{_('Location')}: {game.location}\n" + \
+                       _('Players count: ') + str(await get_total_players_count_for_game(game)) + '\n'
+
+            if current_text != new_text:
+                await handle_user_game_interaction(update, context, _, user, game, query)
+            else:
+                await query.answer(_('No changes were made to the message.'))
+
         except (ValueError, Game.DoesNotExist) as e:
             logging.error(f"Ошибка при регистрации на игру: {e}")
             await query.answer(_('Error during registration.'), show_alert=True)
@@ -259,7 +277,21 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
         try:
             game_id = int(query.data.split('_')[1])
             game = await sync_to_async(Game.objects.get)(id=game_id)
-            await handle_user_game_interaction(update, context, _, user, game, query)
+
+            # Отменяем регистрацию пользователя и получаем обновленное количество игроков
+            await unregister_user_from_game(user, game)
+
+            current_text = query.message.text
+            new_text = _('Game Details:\n') + f"{_('Date')}: {game.date.strftime('%d.%m.%Y')}\n" + \
+                       f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n" + \
+                       f"{_('Location')}: {game.location}\n" + \
+                       _('Players count: ') + str(await get_total_players_count_for_game(game)) + '\n'
+
+            if current_text != new_text:
+                await handle_user_game_interaction(update, context, _, user, game, query)
+            else:
+                await query.answer(_('No changes were made to the message.'))
+
         except (ValueError, Game.DoesNotExist) as e:
             logging.error(f"Ошибка при отмене регистрации на игру: {e}")
             await query.answer(_('Error during unregistration.'), show_alert=True)

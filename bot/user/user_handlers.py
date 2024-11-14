@@ -128,8 +128,7 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
             await query.edit_message_text(text=message, reply_markup=reply_markup)
         else:
             await context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup)
-        if query:
-            await query.answer()
+        await query.answer()
         return
 
     # Получаем список регистраций для данной игры
@@ -145,7 +144,6 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
 
     if registrations:
         for reg in registrations:
-            # Получаем связанные данные пользователя с использованием sync_to_async
             reg_user = await sync_to_async(lambda: reg.user)()
             message += f"- {reg_user.first_name} {reg_user.last_name} (Guests: {reg.guests_count})\n"
     else:
@@ -159,13 +157,13 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    if query:
+    # Проверяем, отличается ли новое сообщение или разметка от текущего
+    if query.message.text != message or query.message.reply_markup != reply_markup:
         await query.edit_message_text(text=message, reply_markup=reply_markup)
     else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup)
+        await query.answer('Message is not modified.')
 
-    if query:
-        await query.answer()
+    await query.answer()
 
 
 async def show_user_game_registrations(update, context, user, _):
