@@ -6,7 +6,7 @@ install:
 	poetry install
 
 run-bot:
-	python bot/telegram_bot.py
+	python telegram_bot.py
 
 # Команда для запуска сервера разработки
 run:

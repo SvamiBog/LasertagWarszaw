@@ -3,10 +3,34 @@
 {% block title %}Редактирование пользователя{% endblock %}
 
 {% block content %}
-<h1>Редактирование пользователя {{ user.first_name }} {{ user.last_name }}</h1>
-<form method="post" class="mt-3">
+<h1>Редактирование пользователя</h1>
+<form method="post" class="container">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Сохранить</button>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="{{ form.first_name.id_for_label }}">Имя</label>
+            {{ form.first_name }}
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
+            {{ form.last_name }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="{{ form.phone_number.id_for_label }}">Номер телефона</label>
+            {{ form.phone_number }}
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="{{ form.subscription_end_date.id_for_label }}">Дата окончания подписки</label>
+            {{ form.subscription_end_date }}
+        </div>
+    </div>
+    <div class="form-check mb-3">
+        {{ form.is_admin }}
+        <label class="form-check-label" for="{{ form.is_admin.id_for_label }}">Администратор</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a href="{% url 'users_list' %}" class="btn btn-secondary">Отмена</a>
 </form>
 {% endblock %}

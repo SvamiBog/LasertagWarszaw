@@ -1,7 +1,13 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from asgiref.sync import sync_to_async
-from bot.core.database_utils import get_user_by_telegram_id, save_user, get_game_registrations, get_user_registrations, get_total_players_count_for_game
+from bot.core.database_utils import (
+    get_user_by_telegram_id,
+    save_user,
+    get_game_registrations,
+    get_user_registrations,
+    get_total_players_count_for_game
+)
 import logging
 
 
@@ -14,16 +20,23 @@ async def send_user_menu(update, context: CallbackContext, _, query=None) -> Non
     Отправляет меню пользователя. Если передан query, редактирует существующее сообщение.
     """
     keyboard = [
-        [InlineKeyboardButton(_('Game Calendar'), callback_data='game_calendar')],
-        [InlineKeyboardButton(_('My Game Registrations'), callback_data='my_game_registrations')],
+        [InlineKeyboardButton(_('Open Game'), callback_data='open_game')],
+        [InlineKeyboardButton(_('Club Card'), callback_data='club_card')],
+        [InlineKeyboardButton(_('General Chat'), url='https://t.me/lasertawarsaw')],
         [InlineKeyboardButton(_('Settings'), callback_data='settings')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
+    menu_text = _('User Menu:')
+
     if query:
-        await query.edit_message_text(text=_('User Menu:'), reply_markup=reply_markup)
+        current_text = query.message.text
+        if current_text != menu_text:
+            await query.edit_message_text(text=menu_text, reply_markup=reply_markup)
+        else:
+            print(_("Message not changed, skipping edit."))
     else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_('User Menu:'), reply_markup=reply_markup)
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=menu_text, reply_markup=reply_markup)
 
 
 async def send_user_settings_menu(update, context: CallbackContext, _, query=None) -> None:
@@ -99,8 +112,6 @@ async def toggle_subscription(update, context: CallbackContext, _) -> None:
     await query.answer(_('Subscription status updated.'))
 
 
-
-
 async def handle_user_game_interaction(update, context, _, user, game, query=None):
     """
     Обрабатывает взаимодействие с игрой для пользователя, отображает список участников.
@@ -108,12 +119,25 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
     if query is None:
         query = update.callback_query
 
+    # Проверяем, есть ли игра
+    if not game:
+        message = _('No upcoming games found.')
+        keyboard = [[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        if query:
+            await query.edit_message_text(text=message, reply_markup=reply_markup)
+        else:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup)
+        if query:
+            await query.answer()
+        return
+
     # Получаем список регистраций для данной игры
     registrations = await get_game_registrations(game)
 
     # Формируем сообщение с деталями игры и участниками
     message = _('Game Details:\n')
-    message += f"{_('Date')}: {game.date.strftime('%d.%m.%y')}\n"
+    message += f"{_('Date')}: {game.date.strftime('%d.%m.%Y')}\n"
     message += f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n"
     message += f"{_('Location')}: {game.location}\n"
     message += _('Players count: ') + str(await get_total_players_count_for_game(game)) + '\n'
@@ -140,7 +164,8 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
     else:
         await context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup)
 
-    await query.answer()
+    if query:
+        await query.answer()
 
 
 async def show_user_game_registrations(update, context, user, _):

@@ -11,7 +11,8 @@ def test_game_str_representation():
         start_time=timezone.now().time(),
         location="Test Location"
     )
-    assert str(game) == f"Игра {game.id} - {game.date} {game.start_time}"
+    expected_str = f"Игра {game.id} - {game.date} {game.start_time}"
+    assert str(game) == expected_str, f"Expected {expected_str}, but got {str(game)}"
 
 
 @pytest.mark.django_db
@@ -21,9 +22,8 @@ def test_game_get_total_players_count():
         start_time=timezone.now().time(),
         location="Test Location"
     )
-    # Создание пользователя с telegram_id
     user = User.objects.create(
-        telegram_id=12345,  # Пример значения для telegram_id
+        telegram_id=12345,
         username="testuser",
         first_name="John",
         last_name="Doe"
@@ -35,7 +35,8 @@ def test_game_get_total_players_count():
         guests_count=2
     )
 
-    assert game.get_total_players_count() == 3
+    total_players = game.get_total_players_count()
+    assert total_players == 3, f"Expected total players to be 3, but got {total_players}"
 
 
 @pytest.mark.django_db
@@ -49,15 +50,15 @@ def test_game_get_status_display():
         start_time=(current_datetime + timezone.timedelta(days=1)).time(),
         location="Upcoming Location"
     )
-    assert upcoming_game.get_status_display() == 'Предстоящая игра'
+    assert upcoming_game.get_status_display() == 'Предстоящая игра', "Expected status to be 'Предстоящая игра'"
 
     # Создаем игру, которая проходит сейчас
     ongoing_game = Game.objects.create(
         date=current_datetime.date(),
-        start_time=current_datetime.time(),
+        start_time=(current_datetime - timezone.timedelta(hours=1)).time(),
         location="Ongoing Location"
     )
-    assert ongoing_game.get_status_display() == 'Проходит сейчас'
+    assert ongoing_game.get_status_display() == 'Проходит сейчас', "Expected status to be 'Проходит сейчас'"
 
     # Создаем игру, которая уже закончилась
     completed_game = Game.objects.create(
@@ -65,13 +66,13 @@ def test_game_get_status_display():
         start_time=(current_datetime - timezone.timedelta(days=1)).time(),
         location="Completed Location"
     )
-    assert completed_game.get_status_display() == 'Закончена'
+    assert completed_game.get_status_display() == 'Закончена', "Expected status to be 'Закончена'"
 
 
 @pytest.mark.django_db
 def test_game_registration_str_representation():
     user = User.objects.create(
-        telegram_id=12345,  # Пример значения
+        telegram_id=12345,
         username="testuser",
         first_name="John",
         last_name="Doe"
@@ -87,4 +88,5 @@ def test_game_registration_str_representation():
         guests_count=1
     )
 
-    assert str(registration) == f"{user} - Игра {game.id} (1 гостей)"
+    expected_str = f"{user} - Игра {game.id} (1 гостей)"
+    assert str(registration) == expected_str, f"Expected {expected_str}, but got {str(registration)}"

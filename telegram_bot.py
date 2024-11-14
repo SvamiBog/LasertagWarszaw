@@ -2,12 +2,26 @@ import os
 import gettext
 import django
 import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
-from bot.admin.admin_handlers import send_admin_menu, send_admin_settings_menu, handle_admin_game_interaction, send_announcement, broadcast_message_handler
-from bot.user.user_handlers import send_user_menu, send_user_settings_menu, handle_user_game_interaction, show_subscription_status, toggle_subscription, show_user_game_registrations
+from bot.admin.admin_handlers import (
+    send_admin_menu,
+    send_admin_settings_menu,
+    send_announcement,
+    broadcast_message_handler,
+    handle_admin_game_interaction)
+from bot.user.user_handlers import (
+    send_user_menu,
+    send_user_settings_menu,
+    handle_user_game_interaction,
+    show_subscription_status,
+    toggle_subscription)
 from bot.core.menu_utils import get_language_keyboard, show_language_selection
-from bot.core.database_utils import get_or_create_user, update_user_phone_number, update_user_language, get_upcoming_games, register_user_for_game, unregister_user_from_game
+from bot.core.database_utils import (
+    get_or_create_user,
+    update_user_phone_number,
+    update_user_language,
+    get_closest_game)
 from dotenv import load_dotenv
 from asgiref.sync import sync_to_async
 import nest_asyncio
@@ -136,50 +150,19 @@ async def phone_number_received(update: Update, context: CallbackContext) -> Non
     # Обновляем номер телефона пользователя в базе данных
     await update_user_phone_number(user_id, user_phone_number)
 
+    # Создаем кнопку для перехода к основному меню
+    keyboard = [[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Отправляем сообщение с кнопкой перехода к меню
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=_('Thank you! Your phone number has been registered.'),
+        reply_markup=reply_markup
+    )
+
     # Переход к основному меню
     await send_main_menu(update, context, _)
-
-
-async def show_upcoming_games(update: Update, context: CallbackContext, _, query=None) -> None:
-    """
-    Отправляет администратору или пользователю список предстоящих игр в виде кнопок.
-    Если передан query, редактирует существующее сообщение.
-    """
-    # Получаем предстоящие игры из базы данных
-    upcoming_games = await get_upcoming_games()
-
-    if upcoming_games:
-        keyboard = []
-        for game in upcoming_games:
-            game_datetime = f"{game.date.strftime('%d.%m.%y')} - {game.start_time.strftime('%H:%M')}"
-            button_text = game_datetime
-            callback_data = f"game_{game.id}"  # Используем уникальный идентификатор игры для callback_data
-            keyboard.append([InlineKeyboardButton(button_text, callback_data=callback_data)])
-
-        # Добавляем кнопку возврата в меню
-        keyboard.append([InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')])
-        reply_markup = InlineKeyboardMarkup(keyboard)
-
-        if query:
-            # Редактируем существующее сообщение
-            await query.edit_message_text(text=_('Upcoming games (click to interact):'), reply_markup=reply_markup)
-        else:
-            # Отправляем новое сообщение, если query не передан
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=_('Upcoming games (click to interact):'),
-                reply_markup=reply_markup
-            )
-    else:
-        no_games_message = _('No upcoming games found.')
-        if query:
-            await query.edit_message_text(text=no_games_message, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]]))
-        else:
-            await context.bot.send_message(
-                chat_id=update.effective_chat.id,
-                text=no_games_message,
-                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]])
-            )
 
 
 async def send_main_menu(update, context: CallbackContext, _, query=None) -> None:
@@ -223,39 +206,10 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
         await send_main_menu(update, context, _, query)
         await query.answer()
 
-    elif query.data == 'game_calendar':
-        await show_upcoming_games(update, context, _, query)
-        await query.answer()
-
     elif query.data.startswith('announce_'):
         game_id = int(query.data.split('_')[1])
         game = await sync_to_async(Game.objects.get)(id=game_id)
         await send_announcement(update, context, game, _, query)
-        await query.answer()
-
-    elif query.data.startswith('game_info_'):
-        try:
-            # Извлекаем ID игры, который идёт после 'game_info_'
-            game_id = int(query.data.split('_')[-1])  # Берём последний элемент после разбиения по '_'
-            game = await sync_to_async(Game.objects.get)(id=game_id)
-            # Проверяем, является ли пользователь администратором или нет
-            if user.is_admin:
-                await handle_admin_game_interaction(update, context, _, user, game, query)
-            else:
-                await handle_user_game_interaction(update, context, _, user, game, query)
-        except (ValueError, IndexError, Game.DoesNotExist) as e:
-            logging.error(f"Ошибка при обработке game_info: {e}")
-            await query.answer(_('Invalid game information.'), show_alert=True)
-
-
-    elif query.data.startswith('game_'):
-        game_id = int(query.data.split('_')[1])
-        game = await sync_to_async(Game.objects.get)(id=game_id)
-
-        if user.is_admin:
-            await handle_admin_game_interaction(update, context, _, user, game, query)
-        else:
-            await handle_user_game_interaction(update, context, _, user, game, query)
         await query.answer()
 
     elif query.data == 'close_message':
@@ -271,6 +225,18 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
             context.user_data['awaiting_broadcast_message'] = True
             await query.answer()
 
+    elif query.data == 'open_game':
+        # Получаем ближайшую игру
+        closest_game = await get_closest_game()
+        if closest_game:
+            if user.is_admin:
+                await handle_admin_game_interaction(update, context, _, user, closest_game, query)
+            else:
+                await handle_user_game_interaction(update, context, _, user, closest_game, query)
+            await query.answer()
+        else:
+            await query.answer(_('No upcoming games available.'), show_alert=True)
+
     elif query.data == 'subscription_status':
         await show_subscription_status(update, context, _, query)
         await query.answer()
@@ -284,7 +250,6 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
         try:
             game_id = int(query.data.split('_')[1])
             game = await sync_to_async(Game.objects.get)(id=game_id)
-            guests_count = await register_user_for_game(user, game)
             await handle_user_game_interaction(update, context, _, user, game, query)
         except (ValueError, Game.DoesNotExist) as e:
             logging.error(f"Ошибка при регистрации на игру: {e}")
@@ -294,15 +259,10 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
         try:
             game_id = int(query.data.split('_')[1])
             game = await sync_to_async(Game.objects.get)(id=game_id)
-            guests_count = await unregister_user_from_game(user, game)
             await handle_user_game_interaction(update, context, _, user, game, query)
         except (ValueError, Game.DoesNotExist) as e:
             logging.error(f"Ошибка при отмене регистрации на игру: {e}")
             await query.answer(_('Error during unregistration.'), show_alert=True)
-
-
-    elif query.data == 'my_game_registrations':
-        await show_user_game_registrations(update, context, user, _)
 
 
 # Основная функция запуска бота

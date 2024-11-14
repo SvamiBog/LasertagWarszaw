@@ -14,6 +14,7 @@ class User(models.Model):
     language = models.CharField(max_length=10, default='en', verbose_name="Язык")
     notifications_enabled = models.BooleanField(default=True, verbose_name="Уведомления включены")
     registration_date = models.DateTimeField(default=timezone.now, verbose_name="Дата регистрации")
+    subscription_end_date = models.DateField(null=True, blank=True, verbose_name="Дата окончания подписки")
     is_admin = models.BooleanField(default=False, verbose_name="Администратор")
 
     class Meta:
@@ -23,3 +24,11 @@ class User(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} ({self.telegram_id})"
+
+    def has_active_subscription(self):
+        """
+        Проверяет, есть ли активная подписка у пользователя.
+        """
+        if self.subscription_end_date:
+            return self.subscription_end_date >= timezone.now().date()
+        return False

@@ -15,6 +15,8 @@
             <th>Язык</th>
             <th>Уведомления</th>
             <th>Дата регистрации</th>
+            <th>Подписка до</th>
+            <th>Администратор</th>
             <th>Действия</th>
         </tr>
     </thead>
@@ -30,13 +32,21 @@
             <td>{{ user.notifications_enabled|yesno:"Да,Нет" }}</td>
             <td>{{ user.registration_date|date:"d.m.Y H:i" }}</td>
             <td>
+                {% if user.subscription_end_date %}
+                    {{ user.subscription_end_date|date:"d.m.Y" }}
+                {% else %}
+                    Нет подписки
+                {% endif %}
+            </td>
+            <td>{{ user.is_admin|yesno:"Да,Нет" }}</td>
+            <td>
                 <a href="{% url 'user_edit' user.telegram_id %}" class="btn btn-sm btn-warning">Редактировать</a>
                 <a href="{% url 'user_delete' user.telegram_id %}" class="btn btn-sm btn-danger">Удалить</a>
             </td>
         </tr>
         {% empty %}
         <tr>
-            <td colspan="9" class="text-center">Пользователи не найдены</td>
+            <td colspan="11" class="text-center">Пользователи не найдены</td>
         </tr>
         {% endfor %}
     </tbody>

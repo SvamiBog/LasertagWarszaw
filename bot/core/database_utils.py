@@ -1,6 +1,5 @@
 from asgiref.sync import sync_to_async
 from django.utils import timezone
-import pytz
 import os
 import django
 
@@ -36,19 +35,6 @@ def update_user_language(user_id, language):
 @sync_to_async
 def update_user_phone_number(user_id, phone_number):
     User.objects.filter(telegram_id=user_id).update(phone_number=phone_number)
-
-
-@sync_to_async
-def get_upcoming_games():
-    warsaw_timezone = pytz.timezone('Europe/Warsaw')
-    current_datetime = timezone.now().astimezone(warsaw_timezone)
-    upcoming_games = Game.objects.filter(
-        date__gt=current_datetime.date()
-    ) | Game.objects.filter(
-        date=current_datetime.date(),
-        start_time__gt=current_datetime.time()
-    )
-    return list(upcoming_games)
 
 
 @sync_to_async
@@ -139,3 +125,22 @@ def get_total_players_count_for_game(game):
     registrations = GameRegistration.objects.filter(game=game)
     total_count = sum(1 + reg.guests_count for reg in registrations)
     return total_count
+
+
+async def get_closest_game():
+    # Получаем текущее время с учетом временной зоны Варшавы
+    now = timezone.localtime(timezone.now())
+
+    # Ищем ближайшую предстоящую игру по дате и времени
+    closest_game = await Game.objects.filter(
+        date__gte=now.date()
+    ).order_by('date', 'start_time').afirst()
+
+    # Если есть игра сегодня, но позже текущего времени
+    if closest_game and closest_game.date == now.date() and closest_game.start_time < now.time():
+        closest_game = await Game.objects.filter(
+            date=now.date(),
+            start_time__gte=now.time()
+        ).order_by('start_time').afirst()
+
+    return closest_game
