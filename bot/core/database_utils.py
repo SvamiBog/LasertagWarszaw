@@ -2,6 +2,7 @@ from asgiref.sync import sync_to_async
 from django.utils import timezone
 import os
 import django
+from datetime import datetime
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'laser_tag_admin.settings')
@@ -144,3 +145,18 @@ async def get_closest_game():
         ).order_by('start_time').afirst()
 
     return closest_game
+
+
+@sync_to_async
+def is_user_registered_for_game(user, game):
+    """
+    Проверяет, зарегистрирован ли пользователь на указанную игру.
+    """
+    return GameRegistration.objects.filter(user=user, game=game).exists()
+
+
+@sync_to_async
+def get_active_subscriptions():
+    current_date = datetime.now().date()
+    return User.objects.filter(subscription_end_date__isnull=False, subscription_end_date__gte=current_date)
+

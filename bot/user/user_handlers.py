@@ -1,6 +1,9 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from asgiref.sync import sync_to_async
+from dotenv import load_dotenv
+from datetime import datetime
+import os
 from bot.core.database_utils import (
     get_user_by_telegram_id,
     save_user,
@@ -13,6 +16,8 @@ import logging
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
+
+load_dotenv()
 
 
 async def send_user_menu(update, context: CallbackContext, _, query=None) -> None:
@@ -122,8 +127,12 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
     # Проверяем, есть ли игра
     if not game:
         message = _('No upcoming games found.')
-        keyboard = [[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]]
+        keyboard = []
+        # Показываем кнопку "Main Menu" только в личном чате
+        if update.effective_chat.type == 'private':
+            keyboard.append([InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')])
         reply_markup = InlineKeyboardMarkup(keyboard)
+
         if query:
             await query.edit_message_text(text=message, reply_markup=reply_markup)
         else:
@@ -152,9 +161,13 @@ async def handle_user_game_interaction(update, context, _, user, game, query=Non
     # Кнопки для регистрации и отмены регистрации
     keyboard = [
         [InlineKeyboardButton(_('Register for Game'), callback_data=f'register_{game.id}')],
-        [InlineKeyboardButton(_('Unregister from Game'), callback_data=f'unregister_{game.id}')],
-        [InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]
+        [InlineKeyboardButton(_('Unregister from Game'), callback_data=f'unregister_{game.id}')]
     ]
+
+    # Добавляем кнопку "Main Menu" только в личных сообщениях
+    if update.effective_chat.type == 'private':
+        keyboard.append([InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')])
+
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     # Проверяем, отличается ли новое сообщение или разметка от текущего
@@ -193,3 +206,37 @@ async def show_user_game_registrations(update, context, user, _):
             text=_('You have no game registrations.'),
             show_alert=True
         )
+
+
+async def handle_user_club_card(update, context: CallbackContext, _, user, query=None):
+    """
+    Обрабатывает отображение данных для оплаты пользователю и проверку статуса подписки.
+    """
+    # Получаем текущую дату
+    current_date = datetime.now().date()
+
+    if user.subscription_end_date and user.subscription_end_date >= current_date:
+        # Если подписка активна
+        subscription_status = _('Your club card is active until {date}.').format(date=user.subscription_end_date.strftime('%d.%m.%Y'))
+    else:
+        # Если подписка не активна
+        subscription_status = _('Your club card is not active.')
+
+    # Получаем данные для оплаты из переменных окружения
+    payment_details = os.getenv('PAYMENT_DETAILS')
+    payment_message = f"{subscription_status}\n\n"
+    payment_message += _('To activate or extend your club card, make a payment.\n')
+    payment_message += f"{_('Payment details')}: {payment_details}\n"
+    payment_message += f"{_('Payment comment')}: {user.telegram_id}"
+
+    # Кнопки для подтверждения и возврата в меню
+    keyboard = [
+        [InlineKeyboardButton(_('Confirm Payment'), callback_data='confirm_payment')],
+        [InlineKeyboardButton(_('Menu'), callback_data='main_menu')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if query:
+        await query.edit_message_text(text=payment_message, reply_markup=reply_markup)
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=payment_message, reply_markup=reply_markup)

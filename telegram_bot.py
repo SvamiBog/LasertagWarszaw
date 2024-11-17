@@ -2,20 +2,23 @@ import os
 import gettext
 import django
 import logging
-from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, CallbackContext, MessageHandler, filters
 from bot.admin.admin_handlers import (
     send_admin_menu,
     send_admin_settings_menu,
     send_announcement,
+    send_game_info_to_general_chat,
     broadcast_message_handler,
-    handle_admin_game_interaction)
+    handle_admin_game_interaction,
+    handle_admin_club_card)
 from bot.user.user_handlers import (
     send_user_menu,
     send_user_settings_menu,
     handle_user_game_interaction,
     show_subscription_status,
-    toggle_subscription)
+    toggle_subscription,
+    handle_user_club_card)
 from bot.core.menu_utils import get_language_keyboard, show_language_selection
 from bot.core.database_utils import (
     get_or_create_user,
@@ -23,6 +26,7 @@ from bot.core.database_utils import (
     update_user_language,
     unregister_user_from_game,
     register_user_for_game,
+    is_user_registered_for_game,
     get_total_players_count_for_game,
     get_closest_game)
 from dotenv import load_dotenv
@@ -107,15 +111,14 @@ async def language_choice(update: Update, context: CallbackContext) -> None:
         # Формируем приветственное сообщение
         welcome_message = _('Language has been updated. You have selected the {} language.').format(selected_lang)
 
-        # Редактируем предыдущее сообщение с приветственным сообщением
-        await query.edit_message_text(text=welcome_message)
+        # Удаляем предыдущее сообщение
+        await query.delete_message()
+
+        # Отправляем всплывающее уведомление с текстом приветствия
+        await query.answer(welcome_message, show_alert=False)
 
         # Проверка наличия номера телефона и запрос его только при необходимости
         await check_and_request_phone_number(user_id, update, context, _)
-
-        # Переход к основному меню после обновления языка
-        await send_main_menu(update, context, _, query)
-
 
 
 async def check_and_request_phone_number(user_id, update: Update, context: CallbackContext, _) -> None:
@@ -124,10 +127,14 @@ async def check_and_request_phone_number(user_id, update: Update, context: Callb
     """
     # Получаем пользователя из базы данных
     user = await sync_to_async(User.objects.get)(telegram_id=user_id)
+    query = update.callback_query
 
     if not user.phone_number:  # Проверяем, отсутствует ли номер телефона
         # Запрашиваем номер телефона, если он отсутствует
         await request_phone_number(update, context, _)
+    else:
+        # Переход к основному меню после обновления языка
+        await send_main_menu(update, context, _, query)
 
 
 # Запрашивает у пользователя номер телефона после выбора языка
@@ -152,20 +159,16 @@ async def phone_number_received(update: Update, context: CallbackContext) -> Non
 
     # Обновляем номер телефона пользователя в базе данных
     await update_user_phone_number(user_id, user_phone_number)
+    query = update.callback_query
 
-    # Создаем кнопку для перехода к основному меню
-    keyboard = [[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    # Отправляем сообщение с кнопкой перехода к меню
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
+    # Обновляем клавиатуру, заменяя кнопку запроса номера телефона на кнопку "Меню"
+    await update.message.reply_text(
         text=_('Thank you! Your phone number has been registered.'),
-        reply_markup=reply_markup
+        reply_markup=ReplyKeyboardRemove(),  # Удаляет текущую клавиатуру
+        quote=False
     )
 
-    # Переход к основному меню
-    await send_main_menu(update, context, _)
+    await send_main_menu(update, context, _, query)
 
 
 async def send_main_menu(update, context: CallbackContext, _, query=None) -> None:
@@ -188,11 +191,24 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
     Обработчик для кнопок, который перенаправляет на нужные функции.
     """
     query = update.callback_query
-    user_id = query.message.chat.id
+    user_id = update.effective_user.id  # Изменено с chat.id на user.id
     _ = langs[user_lang.get(user_id, 'en')].gettext
 
-    # Получаем пользователя из базы данных
-    user = await sync_to_async(User.objects.get)(telegram_id=user_id)
+    try:
+        user, created = await sync_to_async(User.objects.get_or_create)(
+            telegram_id=user_id,
+            defaults={
+                'first_name': update.effective_user.first_name or '',
+                'last_name': update.effective_user.last_name or '',
+                'username': update.effective_user.username or ''
+            }
+        )
+        if created:
+            logging.info(f"User with telegram_id {user_id} was created in the database.")
+    except Exception as e:
+        logging.error(f"Error while retrieving or creating user: {e}")
+        await query.answer(_('An error occurred while processing your request.'), show_alert=True)
+        return
 
     if query.data == 'settings':
         if user.is_admin:
@@ -248,6 +264,15 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
         await toggle_subscription(update, context, _)
         await query.answer()
 
+    elif query.data == 'send_game_info_general_chat':
+        # Получение ближайшей игры
+        game = await get_closest_game()
+        if game:
+            await send_game_info_to_general_chat(context, game, _)
+            await query.answer(_('Game info sent to general chat.'))
+        else:
+            await query.answer(_('No upcoming games found.'), show_alert=True)
+
     # Обработка кнопок регистрации и отмены регистрации
     elif query.data.startswith('register_'):
         try:
@@ -273,14 +298,20 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
             logging.error(f"Ошибка при регистрации на игру: {e}")
             await query.answer(_('Error during registration.'), show_alert=True)
 
+
     elif query.data.startswith('unregister_'):
         try:
             game_id = int(query.data.split('_')[1])
             game = await sync_to_async(Game.objects.get)(id=game_id)
 
+            # Проверяем, зарегистрирован ли пользователь на игру
+            is_registered = await is_user_registered_for_game(user, game)
+            if not is_registered:
+                await query.answer(_('You are not registered for this game. Cannot unregister.'), show_alert=True)
+                return
+
             # Отменяем регистрацию пользователя и получаем обновленное количество игроков
             await unregister_user_from_game(user, game)
-
             current_text = query.message.text
             new_text = _('Game Details:\n') + f"{_('Date')}: {game.date.strftime('%d.%m.%Y')}\n" + \
                        f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n" + \
@@ -292,9 +323,17 @@ async def button_handler(update: Update, context: CallbackContext) -> None:
             else:
                 await query.answer(_('No changes were made to the message.'))
 
+
         except (ValueError, Game.DoesNotExist) as e:
             logging.error(f"Ошибка при отмене регистрации на игру: {e}")
             await query.answer(_('Error during unregistration.'), show_alert=True)
+
+    elif query.data == 'club_card':
+        if user.is_admin:
+            await handle_admin_club_card(update, context, _, query)
+        else:
+            await handle_user_club_card(update, context, _, user, query)
+        await query.answer()
 
 
 # Основная функция запуска бота

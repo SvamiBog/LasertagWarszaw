@@ -1,19 +1,24 @@
+import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CallbackContext
 from telegram import Update
 from asgiref.sync import sync_to_async
 import logging
 import gettext
+import os
+from dotenv import load_dotenv
 from bot.core.database_utils import (
     get_users_for_announcement,
     get_users_for_broadcast,
     get_total_players_count_for_game,
     get_game_registrations,
-    get_closest_game)
+    get_closest_game,
+    get_active_subscriptions)
 
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
+load_dotenv()
 
 langs = {
     'be': gettext.translation('messages', localedir='locale', languages=['be']),
@@ -31,16 +36,19 @@ async def send_admin_menu(update, context: CallbackContext, _, query=None) -> No
     keyboard = [
         [InlineKeyboardButton(_('Open Game'), callback_data='open_game')],
         [InlineKeyboardButton(_('Broadcast Message'), callback_data='broadcast_message')],
+        [InlineKeyboardButton(_('Send Game Info to General Chat'), callback_data='send_game_info_general_chat')],
+        [InlineKeyboardButton(_('Club Card'), callback_data='club_card')],
         [InlineKeyboardButton(_('Settings'), callback_data='settings')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    if query:
+    try:
         await query.edit_message_text(text=_('Admin Menu:'), reply_markup=reply_markup)
-    else:
-        await context.bot.send_message(chat_id=update.effective_chat.id, text=_('Admin Menu:'), reply_markup=reply_markup)
-
-
+    except telegram.error.BadRequest as e:
+        if "Message to edit not found" in str(e):
+            # Альтернативное действие, например, отправка нового сообщения
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=_('Admin Menu:'),
+                                           reply_markup=reply_markup)
 
 async def send_admin_settings_menu(update, context, _, query):
     """
@@ -187,3 +195,68 @@ async def broadcast_message_handler(update: Update, context: CallbackContext, _)
 
         # Открываем новое меню для администратора после рассылки
         await send_admin_menu(update, context, _)
+
+
+async def send_game_info_to_general_chat(context: CallbackContext, game, _) -> None:
+    """
+    Отправляет сообщение с деталями игры и списком участников в общий чат.
+    """
+    # Получаем список регистраций для данной игры
+    registrations = await get_game_registrations(game)
+
+    # Формируем сообщение с деталями игры и участниками
+    message = _('Game Details:\n')
+    message += f"{_('Date')}: {game.date.strftime('%d.%m.%Y')}\n"
+    message += f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n"
+    message += f"{_('Location')}: {game.location}\n"
+    message += _('Players count: ') + str(await get_total_players_count_for_game(game)) + '\n'
+    message += f"\n{_('Participants List')}:\n"
+
+    if registrations:
+        for reg in registrations:
+            reg_user = await sync_to_async(lambda: reg.user)()
+            message += f"- {reg_user.first_name} {reg_user.last_name} (Guests: {reg.guests_count})\n"
+    else:
+        message += _('No participants yet.')
+
+    # Кнопки для регистрации и отмены регистрации (без кнопки "Main Menu")
+    keyboard = [
+        [InlineKeyboardButton(_('Register for Game'), callback_data=f'register_{game.id}')],
+        [InlineKeyboardButton(_('Unregister from Game'), callback_data=f'unregister_{game.id}')]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    # Получаем ID общего чата из переменных окружения
+    general_chat_id = os.getenv('GENERAL_CHAT_ID')
+
+    if general_chat_id:
+        # Отправляем сообщение в общий чат
+        await context.bot.send_message(chat_id=general_chat_id, text=message, reply_markup=reply_markup)
+    else:
+        logging.error('GENERAL_CHAT_ID is not set in the environment variables.')
+
+
+async def handle_admin_club_card(update, context, _, query):
+    active_users = await get_active_subscriptions()  # Вызываем корутину и получаем результат
+
+    # Проверяем, существуют ли активные пользователи асинхронно
+    active_users_exist = await sync_to_async(active_users.exists)()
+
+    if active_users_exist:
+        # Формируем сообщение с информацией о пользователях
+        message = _('Active club card users:\n')
+        for user in await sync_to_async(list)(active_users):
+            message += f"{user.first_name} {user.last_name} - {user.subscription_end_date.strftime('%d.%m.%Y')}\n"
+        print(f"DEBUG: Найдено активных пользователей: {len(active_users)}")
+    else:
+        message = _('No active club card users.')
+        print("DEBUG: Нет активных пользователей")
+
+    keyboard = [[InlineKeyboardButton(_('Main Menu'), callback_data='main_menu')]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    if query:
+        await query.edit_message_text(text=message, reply_markup=reply_markup)
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=message, reply_markup=reply_markup)
+
