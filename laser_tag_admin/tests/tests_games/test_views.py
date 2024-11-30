@@ -1,63 +1,69 @@
 import pytest
 from django.urls import reverse
-from laser_tag_admin.games.models import Game
 from django.utils import timezone
-from django.contrib.auth.models import User
 from django.utils.dateformat import format as date_format
+from laser_tag_admin.games.models import Game
+from django.contrib.auth.models import User
 
-@pytest.mark.django_db
-def test_game_list_view(client):
-    # Создаем пользователя и выполняем вход
-    user = User.objects.create(username='testuser')
-    client.force_login(user)
 
-    # Создаем тестовую игру
-    game = Game.objects.create(
+@pytest.fixture
+def test_user(db):
+    return User.objects.create_user(username='testuser', password='password')
+
+
+@pytest.fixture
+def logged_in_client(client, test_user):
+    client.login(username='testuser', password='password')
+    return client
+
+
+@pytest.fixture
+def test_game(db):
+    return Game.objects.create(
         date=timezone.now().date(),
         start_time=timezone.now().time(),
         location="Test Location"
     )
 
-    url = reverse('game_list')
-    response = client.get(url)
 
-    # Проверяем статус ответа
+@pytest.mark.django_db
+def test_game_list_view_conditions(logged_in_client, test_game):
+    """
+    Проверка списка игр при наличии и отсутствии игр.
+    """
+    url = reverse('game_list')
+
+    # Проверка, если есть игры
+    response = logged_in_client.get(url)
     assert response.status_code == 200
 
-    # Проверяем, что на странице присутствует таблица с играми и детали игры
     content = response.content.decode('utf-8')
+    formatted_date = date_format(test_game.date, 'd.m.Y')
 
-    # Приведи дату к формату d.m.Y
-    formatted_date = date_format(game.date, 'd.m.Y')
     assert '<table' in content
     assert 'Test Location' in content
     assert formatted_date in content
 
+    # Проверка, если игр нет
+    test_game.delete()
+    response = logged_in_client.get(url)
+    content = response.content.decode('utf-8')
+    assert 'Игры не найдены' in content
+
 
 @pytest.mark.django_db
-def test_game_detail_view(client):
-    # Создаем пользователя и выполняем вход
-    user = User.objects.create(username='testuser')
-    client.force_login(user)
+def test_game_detail_view(logged_in_client, test_game):
+    """
+    Проверка отображения деталей игры.
+    """
+    url = reverse('game_detail', args=[test_game.id])
+    response = logged_in_client.get(url)
 
-    # Создаем тестовую игру
-    game = Game.objects.create(
-        date=timezone.now().date(),
-        start_time=timezone.now().time(),
-        location="Test Location"
-    )
-
-    url = reverse('game_detail', args=[game.id])
-    response = client.get(url)
-
-    # Проверяем статус ответа
     assert response.status_code == 200
 
-    # Преобразуем содержимое в строку с правильной кодировкой
     content = response.content.decode('utf-8')
+    formatted_date = date_format(test_game.date, 'd.m.Y')
 
-    # Приведи дату к формату d.m.Y
-    formatted_date = date_format(game.date, 'd.m.Y')
     assert '<h1>Детали игры</h1>' in content
     assert 'Test Location' in content
     assert formatted_date in content
@@ -65,32 +71,21 @@ def test_game_detail_view(client):
 
 @pytest.mark.django_db
 def test_game_create_view_login_required(client):
+    """
+    Проверка, что страница создания игры недоступна без авторизации.
+    """
     url = reverse('game_create')
     response = client.get(url)
-    assert response.status_code == 302  # Redirects to login if not authenticated
+    assert response.status_code == 302  # Redirects to login
+
 
 @pytest.mark.django_db
-def test_game_create_view(client):
-    # Создаем пользователя и выполняем вход
-    user = User.objects.create_user(username='testuser', password='password')
-    client.login(username='testuser', password='password')
-
+def test_game_create_view(logged_in_client):
+    """
+    Проверка доступа к странице создания игры после авторизации.
+    """
     url = reverse('game_create')
-    response = client.get(url)
+    response = logged_in_client.get(url)
 
-    # Проверяем доступ к странице создания игры
     assert response.status_code == 200
     assert '<form' in response.content.decode('utf-8')
-
-@pytest.mark.django_db
-def test_game_list_no_games(client):
-    # Создаем пользователя и выполняем вход
-    user = User.objects.create_user(username='testuser', password='password')
-    client.login(username='testuser', password='password')
-
-    url = reverse('game_list')
-    response = client.get(url)
-
-    # Проверяем, что сообщение об отсутствии игр отображается
-    content = response.content.decode('utf-8')
-    assert 'Игры не найдены' in content

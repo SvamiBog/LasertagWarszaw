@@ -31,7 +31,8 @@ langs = {
 
 async def send_admin_menu(update, context: CallbackContext, _, query=None) -> None:
     """
-    Отправляет меню администратора. Если передан query, редактирует существующее сообщение.
+    Отправляет меню администратора. Если передан query, редактирует существующее сообщение,
+    иначе отправляет новое сообщение.
     """
     keyboard = [
         [InlineKeyboardButton(_('Open Game'), callback_data='open_game')],
@@ -42,13 +43,30 @@ async def send_admin_menu(update, context: CallbackContext, _, query=None) -> No
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    try:
-        await query.edit_message_text(text=_('Admin Menu:'), reply_markup=reply_markup)
-    except telegram.error.BadRequest as e:
-        if "Message to edit not found" in str(e):
-            # Альтернативное действие, например, отправка нового сообщения
-            await context.bot.send_message(chat_id=update.effective_chat.id, text=_('Admin Menu:'),
-                                           reply_markup=reply_markup)
+    if query:
+        try:
+            # Попытка редактирования существующего сообщения
+            await query.edit_message_text(text=_('Admin Menu:'), reply_markup=reply_markup)
+        except telegram.error.BadRequest as e:
+            if "Message to edit not found" in str(e):
+                # Если сообщение не найдено, отправляем новое сообщение
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=_('Admin Menu:'),
+                    reply_markup=reply_markup
+                )
+            else:
+                # Логируем и повторно поднимаем исключение для других ошибок
+                logging.error(f"Error editing admin menu: {e}")
+                raise
+    else:
+        # Если query отсутствует, отправляем новое сообщение
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id,
+            text=_('Admin Menu:'),
+            reply_markup=reply_markup
+        )
+
 
 async def send_admin_settings_menu(update, context, _, query):
     """
@@ -66,27 +84,44 @@ async def send_admin_settings_menu(update, context, _, query):
 
 async def send_announcement(update, context, game, _, query=None):
     """
-    Отправляет рассылку по пользователям, которые не отказались от уведомлений, на языке, выбранном пользователем.
+    Отправляет рассылку пользователям, которые подписаны на уведомления, с кнопками для взаимодействия.
     """
     # Получаем список пользователей, которые не отказались от уведомлений
-    users = await get_users_for_announcement()  # Ожидается, что эта функция вернет пользователей с notifications_enabled=True
+    users = await get_users_for_announcement()
 
     success_count = 0
     fail_count = 0
+    registrations = await get_game_registrations(game)
 
     for user in users:
         user_lang_code = user.language  # Извлекаем язык пользователя из модели
         user_gettext = langs.get(user_lang_code, langs['en']).gettext  # Получаем переводчик на основе языка пользователя
 
-        # Формируем сообщение для пользователя на его языке
-        message = user_gettext('Announcement for upcoming game:\n')
-        message += f"{user_gettext('Date')}: {game.date.strftime('%d.%m.%Y')}\n"
-        message += f"{user_gettext('Start Time')}: {game.start_time.strftime('%H:%M')}\n"
-        message += f"{user_gettext('Location')}: {game.location}\n"
+        ## Формируем сообщение с деталями игры
+        message = _('Game Details:\n')
+        message += f"{_('Date')}: {game.date.strftime('%d.%m.%Y')}\n"
+        message += f"{_('Start Time')}: {game.start_time.strftime('%H:%M')}\n"
+        message += f"{_('Location')}: {game.location}\n"
+        message += _('Players count: ') + str(await get_total_players_count_for_game(game)) + '\n'
+        message += f"\n{_('Participants List')}:\n"
+
+        if registrations:
+            for reg in registrations:
+                reg_user = await sync_to_async(lambda: reg.user)()
+                message += f"- {reg_user.first_name} {reg_user.last_name} (Guests: {reg.guests_count})\n"
+        else:
+            message += _('No participants yet.')
+
+        # Кнопки для регистрации и отмены регистрации (без кнопки "Main Menu")
+        keyboard = [
+            [InlineKeyboardButton(_('Register for Game'), callback_data=f'register_{game.id}')],
+            [InlineKeyboardButton(_('Unregister from Game'), callback_data=f'unregister_{game.id}')]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
 
         # Отправка сообщения пользователю
         try:
-            await context.bot.send_message(chat_id=user.telegram_id, text=message)
+            await context.bot.send_message(chat_id=user.telegram_id, text=message, reply_markup=reply_markup)
             success_count += 1
         except Exception as e:
             logging.warning(f"Не удалось отправить сообщение пользователю {user.telegram_id}: {e}")
@@ -97,19 +132,20 @@ async def send_announcement(update, context, game, _, query=None):
     response_message += f"{_('Success')}: {success_count}\n"
     response_message += f"{_('Failed')}: {fail_count}\n"
 
-    # Создаем клавиатуру с кнопками
-    keyboard = [
+    # Создаем клавиатуру с кнопками для администратора
+    admin_keyboard = [
         [InlineKeyboardButton(_('View Game Details'), callback_data=f'game_info_{game.id}')],
         [InlineKeyboardButton(_('Close'), callback_data='close_message')]
     ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
+    admin_reply_markup = InlineKeyboardMarkup(admin_keyboard)
 
+    # Отправляем сообщение о результатах рассылки
     if query:
-        await query.edit_message_text(text=response_message, reply_markup=reply_markup)
+        await query.edit_message_text(text=response_message, reply_markup=admin_reply_markup)
     else:
-        await update.callback_query.answer(response_message)
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=response_message, reply_markup=admin_reply_markup)
 
-    # Показ нового меню для администратора после рассылки
+    # Показываем новое меню для администратора после рассылки
     await send_admin_menu(update, context, _)
 
 

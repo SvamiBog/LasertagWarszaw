@@ -22,7 +22,7 @@ createsuperuser:
 
 # Команда для запуска тестов
 test:
-	poetry run pytest --cov=laser_tag_admin --cov-report=html
+	poetry run pytest --cov=bot --cov=laser_tag_admin --cov-report=html
 
 # Команда для запуска шелла Django
 shell:

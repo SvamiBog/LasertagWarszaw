@@ -2,6 +2,7 @@ from asgiref.sync import sync_to_async
 from django.utils import timezone
 import os
 import django
+from django.db import transaction
 from datetime import datetime
 
 
@@ -12,7 +13,13 @@ from laser_tag_admin.games.models import Game
 from laser_tag_admin.games.models import GameRegistration
 
 
-@sync_to_async
+def async_db_function(func):
+    async def wrapper(*args, **kwargs):
+        return await sync_to_async(func)(*args, **kwargs)
+    return wrapper
+
+
+@async_db_function
 def get_or_create_user(user_id, first_name, last_name, username):
     # Проверяем, существует ли пользователь с данным ID, если нет, создаем нового
     return User.objects.get_or_create(
@@ -28,17 +35,17 @@ def get_or_create_user(user_id, first_name, last_name, username):
     )
 
 
-@sync_to_async
+@async_db_function
 def update_user_language(user_id, language):
     User.objects.filter(telegram_id=user_id).update(language=language)
 
 
-@sync_to_async
+@async_db_function
 def update_user_phone_number(user_id, phone_number):
     User.objects.filter(telegram_id=user_id).update(phone_number=phone_number)
 
 
-@sync_to_async
+@async_db_function
 def get_users_for_announcement():
     """
     Получает список пользователей, которые подписаны на рассылку игр.
@@ -46,7 +53,7 @@ def get_users_for_announcement():
     return list(User.objects.filter(notifications_enabled=True))  # Возвращаем список для избежания проблем в async
 
 
-@sync_to_async
+@async_db_function
 def get_users_for_broadcast():
     """
     Возвращает всех пользователей, которые подписаны на уведомления.
@@ -54,7 +61,7 @@ def get_users_for_broadcast():
     return list(User.objects.all())
 
 
-@sync_to_async
+@async_db_function
 def get_user_by_telegram_id(user_id):
     """
     Асинхронно получает пользователя по telegram_id.
@@ -62,7 +69,7 @@ def get_user_by_telegram_id(user_id):
     return User.objects.get(telegram_id=user_id)
 
 
-@sync_to_async
+@async_db_function
 def save_user(user):
     """
     Асинхронно сохраняет изменения в объекте пользователя.
@@ -70,16 +77,17 @@ def save_user(user):
     user.save()
 
 
-@sync_to_async
+@async_db_function
 def register_user_for_game(user, game):
-    registration, created = GameRegistration.objects.get_or_create(user=user, game=game)
-    if not created:
-        registration.guests_count += 1
-    registration.save()
-    return registration.guests_count
+    with transaction.atomic():
+        registration, created = GameRegistration.objects.get_or_create(user=user, game=game)
+        if not created:
+            registration.guests_count += 1
+        registration.save()
+        return registration.guests_count
 
 
-@sync_to_async
+@async_db_function
 def unregister_user_from_game(user, game):
     try:
         registration = GameRegistration.objects.get(user=user, game=game)
@@ -94,7 +102,7 @@ def unregister_user_from_game(user, game):
         return None
 
 
-@sync_to_async
+@async_db_function
 def get_game_registrations(game):
     """
     Возвращает список регистраций для указанной игры.
@@ -102,7 +110,7 @@ def get_game_registrations(game):
     return list(GameRegistration.objects.filter(game=game))
 
 
-@sync_to_async
+@async_db_function
 def get_user_game_registrations(user):
     """
     Возвращает список игр, на которые пользователь зарегистрирован.
@@ -110,7 +118,7 @@ def get_user_game_registrations(user):
     return list(GameRegistration.objects.filter(user=user).select_related('game'))
 
 
-@sync_to_async
+@async_db_function
 def get_user_registrations(user):
     """
     Возвращает список регистраций пользователя.
@@ -118,7 +126,7 @@ def get_user_registrations(user):
     return list(GameRegistration.objects.filter(user=user))
 
 
-@sync_to_async
+@async_db_function
 def get_total_players_count_for_game(game):
     """
     Асинхронный метод для получения общего количества игроков, включая гостей, для заданной игры.
@@ -129,25 +137,21 @@ def get_total_players_count_for_game(game):
 
 
 async def get_closest_game():
-    # Получаем текущее время с учетом временной зоны Варшавы
-    now = timezone.localtime(timezone.now())
+    # Получаем текущее время
+    now = timezone.localtime()
 
-    # Ищем ближайшую предстоящую игру по дате и времени
+    # Ищем ближайшую игру с учётом времени
     closest_game = await Game.objects.filter(
         date__gte=now.date()
+    ).exclude(
+        date=now.date(), start_time__lt=now.time()
     ).order_by('date', 'start_time').afirst()
-
-    # Если есть игра сегодня, но позже текущего времени
-    if closest_game and closest_game.date == now.date() and closest_game.start_time < now.time():
-        closest_game = await Game.objects.filter(
-            date=now.date(),
-            start_time__gte=now.time()
-        ).order_by('start_time').afirst()
 
     return closest_game
 
 
-@sync_to_async
+
+@async_db_function
 def is_user_registered_for_game(user, game):
     """
     Проверяет, зарегистрирован ли пользователь на указанную игру.
@@ -155,7 +159,7 @@ def is_user_registered_for_game(user, game):
     return GameRegistration.objects.filter(user=user, game=game).exists()
 
 
-@sync_to_async
+@async_db_function
 def get_active_subscriptions():
     current_date = datetime.now().date()
     return User.objects.filter(subscription_end_date__isnull=False, subscription_end_date__gte=current_date)
