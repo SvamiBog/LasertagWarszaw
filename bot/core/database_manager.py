@@ -1,5 +1,3 @@
-# database_manager.py
-
 import os
 import django
 from django.utils import timezone

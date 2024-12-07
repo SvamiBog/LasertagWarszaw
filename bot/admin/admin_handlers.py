@@ -1,5 +1,3 @@
-# admin_handler.py
-
 import logging
 import os
 
