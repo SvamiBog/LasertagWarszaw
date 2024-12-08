@@ -5,6 +5,7 @@ from telegram import Update, User, Chat, Message, CallbackQuery, Bot
 from telegram.ext import CallbackContext
 from bot.handlers.common_handlers import button_handler
 from laser_tag_admin.users.models import User as DBUser
+from bot.tests.test_utils.test_factories import generate_random_user_data
 
 @pytest.mark.asyncio
 @pytest.mark.django_db(transaction=True)
@@ -12,21 +13,30 @@ from laser_tag_admin.users.models import User as DBUser
     ("change_language", "edit_message_text", "Choose your language"),
     ("main_menu", "edit_message_text", "User Menu:"),
     ("subscription_status", "edit_message_text", "Subscription status"),
-    ("toggle_subscription", "edit_message_text", "Subscription status: Disabled")
+    ("toggle_subscription", "edit_message_text", "Subscription status: Disabled"),
+    ("settings", "edit_message_text", "User Settings menu:")
 ])
 async def test_button_handler_basic_buttons(callback_data, expected_method_call, expected_text_substring, db):
-    # Чистим базу перед каждым тестом
-    await sync_to_async(DBUser.objects.all().delete)()
+    data_user = generate_random_user_data()
 
-    # Создаем тестового пользователя в БД
     await sync_to_async(DBUser.objects.create)(
-        telegram_id=123,
-        language='en',
-        first_name='TestUserDB'
+        telegram_id=data_user['telegram_id'],
+        language=data_user['language'],
+        first_name=data_user['first_name'],
+        last_name=data_user['last_name'],
+        username=data_user['username'],
+        phone_number=data_user['phone_number']
     )
 
-    user = User(id=123, first_name="TestUser", is_bot=False)
-    chat = Chat(id=123, type="private")
+    user = User(
+        id=data_user['telegram_id'],
+        first_name=data_user['first_name'],
+        last_name=data_user['last_name'],
+        username=data_user['username'],
+        is_bot=False
+    )
+
+    chat = Chat(id=data_user['telegram_id'], type="private")
     message = Message(message_id=10, date=None, chat=chat, text="Previous text", from_user=user)
     callback_query = CallbackQuery(
         id="query_id",

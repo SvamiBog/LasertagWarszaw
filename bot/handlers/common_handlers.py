@@ -16,12 +16,11 @@ logging.basicConfig(level=logging.INFO)
 
 
 async def start_handler(update: Update, context: CallbackContext):
-    user_id = update.effective_chat.id
     user, created = await db_manager.get_or_create_user(
-        user_id=user_id,
-        first_name=update.effective_user.first_name,
-        last_name=update.effective_user.last_name,
-        username=update.effective_user.username
+        user_id=update.effective_user.id,
+        first_name=update.effective_user.first_name or "",
+        last_name=update.effective_user.last_name or "",
+        username=update.effective_user.username or ""
     )
 
     # Устанавливаем язык пользователя по умолчанию

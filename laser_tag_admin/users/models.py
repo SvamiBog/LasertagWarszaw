@@ -6,7 +6,7 @@ from pytz import timezone as pytz_timezone
 warsaw_tz = pytz_timezone('Europe/Warsaw')
 
 class User(models.Model):
-    telegram_id = models.BigIntegerField(primary_key=True, unique=True, verbose_name="ID в Telegram")
+    telegram_id = models.BigIntegerField(primary_key=True, verbose_name="ID в Telegram")
     first_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Имя")
     last_name = models.CharField(max_length=150, blank=True, null=True, verbose_name="Фамилия")
     username = models.CharField(max_length=150, unique=True, null=True, blank=True, verbose_name="Имя пользователя")
