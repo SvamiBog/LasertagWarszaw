@@ -29,7 +29,9 @@ msgstr "Поделитесь своим номером телефона"
 
 #: telegram_bot.py:139
 msgid "Please share your phone number so we can register you."
-msgstr "Пожалуйста, поделитесь своим номером телефона, чтобы мы могли вас зарегистрировать."
+msgstr ""
+"Пожалуйста, поделитесь своим номером телефона, чтобы мы могли вас "
+"зарегистрировать."
 
 #: bot/admin/admin_handlers.py:52 bot/admin/admin_handlers.py:121
 #: bot/admin/admin_handlers.py:152 bot/user/user_handlers.py:52
@@ -45,7 +47,9 @@ msgstr "Спасибо! Ваш номер телефона был зарегис
 
 #: telegram_bot.py:223
 msgid "Please enter the message you want to broadcast to all users:"
-msgstr "Пожалуйста, введите сообщение, которое вы хотите отправить всем пользователям:"
+msgstr ""
+"Пожалуйста, введите сообщение, которое вы хотите отправить всем "
+"пользователям:"
 
 #: telegram_bot.py:238
 msgid "No upcoming games available."
@@ -238,3 +242,4 @@ msgstr "Вы вошли в систему"
 #: laser_tag_admin/views.py:40
 msgid "You are logged out"
 msgstr "Вы вышли из системы"
+

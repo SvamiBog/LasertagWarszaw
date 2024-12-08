@@ -238,3 +238,4 @@ msgstr "Jesteś zalogowany"
 #: laser_tag_admin/views.py:40
 msgid "You are logged out"
 msgstr "Zostałeś wylogowany"
+
