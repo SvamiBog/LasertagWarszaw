@@ -11,7 +11,6 @@ from telegram.ext import (
     CallbackQueryHandler,
     MessageHandler,
     filters,
-    CallbackContext,
 )
 from dotenv import load_dotenv
 
@@ -30,6 +29,7 @@ from bot.handlers.common_handlers import (
     message_handler,
 )
 from bot.core.database_manager import DatabaseManager
+from logging_config import setup_logging
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -60,5 +60,9 @@ if __name__ == '__main__':
     import nest_asyncio
     nest_asyncio.apply()
 
+    # Настройка логирования
+    setup_logging()
+
+    # Запуск основного цикла бота
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())

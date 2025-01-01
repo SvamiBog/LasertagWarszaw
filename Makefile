@@ -28,10 +28,45 @@ test:
 shell:
 	poetry run python manage.py shell
 
-# Команда для создания файла с переводами (.pot)
-translations:
-	$(VENV) pybabel extract -F babel.cfg -o locale/messages.pot .
+# Переменные
+SRC_DIR = .
+LOCALE_DIR = locale
+DOMAIN = messages
 
-# Команда для компиляции переводов (.mo)
+# Языки для перевода
+LANGUAGES = be en pl ru uk
+
+# Шаблон перевода
+POT_FILE = $(DOMAIN).pot
+
+# Файл правил
+.PHONY: extract update compile clean
+
+# Извлечение строк для перевода
+extract:
+	find $(SRC_DIR) -name "*.py" | xargs xgettext -o $(POT_FILE)
+
+# Обновление файлов перевода (.po)
+update:
+	@for lang in $(LANGUAGES); do \
+		mkdir -p $(LOCALE_DIR)/$$lang/LC_MESSAGES; \
+		if [ -f $(LOCALE_DIR)/$$lang/LC_MESSAGES/$(DOMAIN).po ]; then \
+			msgmerge -U $(LOCALE_DIR)/$$lang/LC_MESSAGES/$(DOMAIN).po $(POT_FILE); \
+		else \
+			msginit -i $(POT_FILE) -o $(LOCALE_DIR)/$$lang/LC_MESSAGES/$(DOMAIN).po --locale=$$lang; \
+		fi \
+	done
+
+# Компиляция переводов (.mo)
 compile:
-	$(VENV) pybabel compile -d locale
+	@for lang in $(LANGUAGES); do \
+		msgfmt -o $(LOCALE_DIR)/$$lang/LC_MESSAGES/$(DOMAIN).mo $(LOCALE_DIR)/$$lang/LC_MESSAGES/$(DOMAIN).po; \
+	done
+
+# Очистка сгенерированных файлов
+clean:
+	rm -f $(POT_FILE)
+	@for lang in $(LANGUAGES); do \
+		rm -f $(LOCALE_DIR)/$$lang/LC_MESSAGES/$(DOMAIN).mo; \
+	done
+

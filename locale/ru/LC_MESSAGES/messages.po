@@ -1,227 +1,264 @@
-# Russian translations for PROJECT.
-# Copyright (C) 2024 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+# Russian translations for PACKAGE package.
+# Copyright (C) 2025 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Maksim <maksim@maksim-g5-kf>, 2025.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-14 19:02+0100\n"
-"PO-Revision-Date: 2024-11-10 17:18+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-01 13:36+0100\n"
+"PO-Revision-Date: 2025-01-01 13:37+0100\n"
+"Last-Translator: Maksim <maksim@maksim-g5-kf>\n"
 "Language: ru\n"
-"Language-Team: ru <LL@li.org>\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: telegram_bot.py:105
+#: bot/handlers/common_handlers.py:32 bot/handlers/common_handlers.py:100
+msgid "Choose your language:"
+msgstr "Пожалуйста, выберите предпочитаемый язык:"
+
+#: bot/handlers/common_handlers.py:44
 msgid "Language has been updated. You have selected the {} language."
 msgstr "Язык был обновлен. Вы выбрали язык: {}."
 
-#: telegram_bot.py:133
-msgid "Share your phone number"
-msgstr "Поделитесь своим номером телефона"
-
-#: telegram_bot.py:139
-msgid "Please share your phone number so we can register you."
-msgstr ""
-"Пожалуйста, поделитесь своим номером телефона, чтобы мы могли вас "
-"зарегистрировать."
-
-#: bot/admin/admin_handlers.py:52 bot/admin/admin_handlers.py:121
-#: bot/admin/admin_handlers.py:152 bot/user/user_handlers.py:52
-#: bot/user/user_handlers.py:76 bot/user/user_handlers.py:106
-#: bot/user/user_handlers.py:125 bot/user/user_handlers.py:158
-#: bot/user/user_handlers.py:186 telegram_bot.py:154
-msgid "Main Menu"
-msgstr "Главное меню"
-
-#: telegram_bot.py:160
+#: bot/handlers/common_handlers.py:67
 msgid "Thank you! Your phone number has been registered."
 msgstr "Спасибо! Ваш номер телефона был зарегистрирован."
 
-#: telegram_bot.py:223
-msgid "Please enter the message you want to broadcast to all users:"
-msgstr ""
-"Пожалуйста, введите сообщение, которое вы хотите отправить всем "
-"пользователям:"
-
-#: telegram_bot.py:238
+#: bot/handlers/common_handlers.py:116
 msgid "No upcoming games available."
-msgstr "Предстоящих игр не найдено."
+msgstr "Нет доступных предстоящих игр."
 
-#: telegram_bot.py:256
+#: bot/handlers/common_handlers.py:124 bot/user/user_handlers.py:109
+msgid "Subscription status updated."
+msgstr "Статус подписки обновлен."
+
+#: bot/handlers/common_handlers.py:137
+msgid "Please enter the message you want to broadcast to all users:"
+msgstr "Пожалуйста, введите сообщение, которое вы хотите отправить всем пользователям:"
+
+#: bot/handlers/common_handlers.py:146
+msgid "Game info sent to general chat."
+msgstr "Информация об игре отправлена в общий чат."
+
+#: bot/handlers/common_handlers.py:148 bot/admin/admin_handlers.py:129
+#: bot/user/user_handlers.py:118
+msgid "No upcoming games found."
+msgstr "Предстоящие игры не найдены."
+
+#: bot/handlers/common_handlers.py:156
+msgid "You have been registered for the game."
+msgstr "Вы зарегистрированы на игру."
+
+#: bot/handlers/common_handlers.py:160 bot/handlers/common_handlers.py:175
+msgid "Game not found."
+msgstr "Игра не найдена."
+
+#: bot/handlers/common_handlers.py:163
 msgid "Error during registration."
 msgstr "Ошибка при регистрации."
 
-#: telegram_bot.py:265
+#: bot/handlers/common_handlers.py:171
+msgid "You have been unregistered from the game."
+msgstr "Вы были удалены из списка участников игры."
+
+#: bot/handlers/common_handlers.py:178
 msgid "Error during unregistration."
 msgstr "Ошибка при отмене регистрации."
 
-#: bot/admin/admin_handlers.py:32 bot/user/user_handlers.py:23
-msgid "Open Game"
-msgstr "Открытая игра"
+#: bot/handlers/common_handlers.py:191
+msgid "Payment confirmed."
+msgstr "Платеж подтвержден."
 
-#: bot/admin/admin_handlers.py:33
-msgid "Broadcast Message"
-msgstr "Рассылка сообщения"
+#: bot/handlers/common_handlers.py:200
+msgid "Unknown command."
+msgstr "Неизвестная команда."
 
-#: bot/admin/admin_handlers.py:34 bot/user/user_handlers.py:26
-msgid "Settings"
-msgstr "Настройки"
+#: bot/handlers/common_handlers.py:215
+msgid "Sorry, I did not understand that command."
+msgstr "Извините, я не понял эту команду."
 
-#: bot/admin/admin_handlers.py:39 bot/admin/admin_handlers.py:41
-msgid "Admin Menu:"
-msgstr "Меню администратора:"
+#: bot/handlers/common_handlers.py:220
+msgid "Share your phone number"
+msgstr "Поделитесь своим номером телефона"
 
-#: bot/admin/admin_handlers.py:51 bot/user/user_handlers.py:51
-msgid "Change Language"
-msgstr "Сменить язык"
-
-#: bot/admin/admin_handlers.py:56
-msgid "Admin Settings Menu:"
-msgstr "Меню настроек администратора:"
-
-#: bot/admin/admin_handlers.py:88
-msgid "Announcement sent to subscribed users.\n"
-msgstr "Объявление отправлено подписанным пользователям.\n"
-
-#: bot/admin/admin_handlers.py:89
-msgid "Success"
-msgstr "Успешно"
-
-#: bot/admin/admin_handlers.py:90
-msgid "Failed"
-msgstr "Ошибка"
-
-#: bot/admin/admin_handlers.py:94
-msgid "View Game Details"
-msgstr "Просмотр деталей игры"
-
-#: bot/admin/admin_handlers.py:95
-msgid "Close"
-msgstr "Закрыть"
-
-#: bot/admin/admin_handlers.py:120 bot/user/user_handlers.py:124
-msgid "No upcoming games found."
-msgstr "Предстоящих игр не найдено."
-
-#: bot/admin/admin_handlers.py:134 bot/user/user_handlers.py:139
-msgid "Game Details:\n"
-msgstr "Детали игры:\n"
-
-#: bot/admin/admin_handlers.py:135 bot/user/user_handlers.py:140
-msgid "Date"
-msgstr "Дата"
-
-#: bot/admin/admin_handlers.py:136 bot/user/user_handlers.py:141
-msgid "Start Time"
-msgstr "Время начала"
-
-#: bot/admin/admin_handlers.py:137 bot/user/user_handlers.py:142
-msgid "Location"
-msgstr "Местоположение"
-
-#: bot/admin/admin_handlers.py:138 bot/user/user_handlers.py:143
-msgid "Players count: "
-msgstr "Количество игроков:"
-
-#: bot/admin/admin_handlers.py:139 bot/user/user_handlers.py:144
-msgid "Participants List"
-msgstr "Список участников"
-
-#: bot/admin/admin_handlers.py:147 bot/user/user_handlers.py:152
-msgid "No participants yet."
-msgstr "Участников пока нет."
-
-#: bot/admin/admin_handlers.py:151
-msgid "Send Announcement"
-msgstr "Отправить объявление"
-
-#: bot/admin/admin_handlers.py:186
-msgid "Broadcast sent successfully to all subscribed users."
-msgstr "Рассылка успешно отправлена всем подписанным пользователям."
+#: bot/handlers/common_handlers.py:224
+msgid "Please share your phone number so we can register you."
+msgstr "Пожалуйста, поделитесь своим номером телефона, чтобы мы могли вас зарегистрировать."
 
 #: bot/core/menu_utils.py:22 bot/core/menu_utils.py:26
 msgid "Please choose your preferred language:"
 msgstr "Пожалуйста, выберите предпочитаемый язык:"
 
-#: bot/user/user_handlers.py:24
+#: bot/admin/admin_handlers.py:32 bot/user/user_handlers.py:26
+msgid "Open Game"
+msgstr "Открыть игру"
+
+#: bot/admin/admin_handlers.py:33
+msgid "Broadcast Message"
+msgstr "Рассылка сообщения"
+
+#: bot/admin/admin_handlers.py:34
+msgid "Send Game Info to General Chat"
+msgstr "Отправить информацию об игре в общий чат"
+
+#: bot/admin/admin_handlers.py:35 bot/user/user_handlers.py:27
 msgid "Club Card"
 msgstr "Клубная карта"
 
-#: bot/user/user_handlers.py:25
-msgid "General Chat"
-msgstr "Общий чат"
+#: bot/admin/admin_handlers.py:36 bot/user/user_handlers.py:29
+msgid "Settings"
+msgstr "Настройки"
 
-#: bot/user/user_handlers.py:30
-msgid "User Menu:"
-msgstr "Меню пользователя:"
+#: bot/admin/admin_handlers.py:42 bot/admin/admin_handlers.py:47
+#: bot/admin/admin_handlers.py:53
+msgid "Admin Menu:"
+msgstr "Меню администратора:"
 
-#: bot/user/user_handlers.py:37
-msgid "Message not changed, skipping edit."
-msgstr "Сообщение не изменено, пропуск редактирования."
+#: bot/admin/admin_handlers.py:61 bot/user/user_handlers.py:55
+msgid "Change Language"
+msgstr "Изменить язык"
 
-#: bot/user/user_handlers.py:50
-msgid "Subscription Status"
-msgstr "Статус подписки"
+#: bot/admin/admin_handlers.py:62 bot/admin/admin_handlers.py:130
+#: bot/admin/admin_handlers.py:148 bot/admin/admin_handlers.py:209
+#: bot/user/user_handlers.py:56 bot/user/user_handlers.py:80
+#: bot/user/user_handlers.py:103 bot/user/user_handlers.py:121
+#: bot/user/user_handlers.py:145 bot/user/user_handlers.py:169
+msgid "Main Menu"
+msgstr "Главное меню"
 
-#: bot/user/user_handlers.py:58 bot/user/user_handlers.py:60
-msgid "User Settings menu:"
-msgstr "Меню настроек пользователя:"
+#: bot/admin/admin_handlers.py:65
+msgid "Admin Settings Menu:"
+msgstr "Меню настроек администратора:"
 
-#: bot/user/user_handlers.py:69 bot/user/user_handlers.py:100
-msgid "Enabled"
-msgstr "Включено"
-
-#: bot/user/user_handlers.py:69 bot/user/user_handlers.py:100
-msgid "Disabled"
-msgstr "Отключено"
-
-#: bot/user/user_handlers.py:71 bot/user/user_handlers.py:101
-msgid "Subscription status"
-msgstr "Статус подписки"
-
-#: bot/user/user_handlers.py:75 bot/user/user_handlers.py:105
-msgid "Toggle Subscription"
-msgstr "Переключить подписку"
-
-#: bot/user/user_handlers.py:84
-msgid "No changes were made to the message."
-msgstr "Изменений в сообщение не внесено."
-
-#: bot/user/user_handlers.py:112
-msgid "Subscription status updated."
-msgstr "Статус подписки обновлен."
-
-#: bot/user/user_handlers.py:156
+#: bot/admin/admin_handlers.py:82 bot/admin/admin_handlers.py:187
+#: bot/user/user_handlers.py:140
 msgid "Register for Game"
-msgstr "Записаться на игру"
+msgstr "Зарегистрироваться на игру"
 
-#: bot/user/user_handlers.py:157
+#: bot/admin/admin_handlers.py:83 bot/admin/admin_handlers.py:188
+#: bot/user/user_handlers.py:141
 msgid "Unregister from Game"
 msgstr "Отменить регистрацию на игру"
 
-#: bot/user/user_handlers.py:190
+#: bot/admin/admin_handlers.py:98
+msgid "Announcement sent to subscribed users.\n"
+msgstr "Объявление отправлено подписчикам.\n"
+
+#: bot/admin/admin_handlers.py:103
+msgid "View Game Details"
+msgstr "Просмотр деталей игры"
+
+#: bot/admin/admin_handlers.py:104
+msgid "Close"
+msgstr "Закрыть"
+
+#: bot/admin/admin_handlers.py:147
+msgid "Send Announcement"
+msgstr "Отправить объявление"
+
+#: bot/admin/admin_handlers.py:178
+msgid "Broadcast sent successfully to all users."
+msgstr "Сообщение успешно отправлено всем пользователям."
+
+#: bot/admin/admin_handlers.py:203
+msgid "Active club card users:\n"
+msgstr "Пользователи с активными клубными картами:\n"
+
+#: bot/admin/admin_handlers.py:207
+msgid "No active club card users."
+msgstr "Нет пользователей с активными клубными картами."
+
+#: bot/admin/admin_handlers.py:224 bot/user/user_handlers.py:217
+msgid "Game Details:\n"
+msgstr "Детали игры:\n"
+
+#: bot/admin/admin_handlers.py:229 bot/user/user_handlers.py:222
+msgid "Players count: "
+msgstr "Количество игроков:"
+
+#: bot/admin/admin_handlers.py:237 bot/user/user_handlers.py:230
+msgid "No participants yet."
+msgstr "Пока нет участников."
+
+#: bot/user/user_handlers.py:28
+msgid "General Chat"
+msgstr "Общий чат"
+
+#: bot/user/user_handlers.py:33
+msgid "User Menu:"
+msgstr "Меню пользователя:"
+
+#: bot/user/user_handlers.py:40
+msgid "Message not changed, skipping edit."
+msgstr "Сообщение не изменено, редактирование пропущено."
+
+#: bot/user/user_handlers.py:54
+msgid "Subscription Status"
+msgstr "Статус подписки"
+
+#: bot/user/user_handlers.py:61 bot/user/user_handlers.py:65
+msgid "User Settings menu:"
+msgstr "Меню настроек пользователя:"
+
+#: bot/user/user_handlers.py:74 bot/user/user_handlers.py:98
+msgid "Enabled"
+msgstr "Включено"
+
+#: bot/user/user_handlers.py:74 bot/user/user_handlers.py:98
+msgid "Disabled"
+msgstr "Отключено"
+
+#: bot/user/user_handlers.py:79 bot/user/user_handlers.py:102
+msgid "Toggle Subscription"
+msgstr "Переключить подписку"
+
+#: bot/user/user_handlers.py:87
+msgid "No changes were made to the message."
+msgstr "Изменений в сообщение не внесено."
+
+#: bot/user/user_handlers.py:152
+msgid "Message is not modified."
+msgstr "Сообщение не изменено, редактирование пропущено."
+
+#: bot/user/user_handlers.py:173
 msgid "Your registered games:"
 msgstr "Ваши зарегистрированные игры:"
 
-#: bot/user/user_handlers.py:195
+#: bot/user/user_handlers.py:178
 msgid "You have no game registrations."
-msgstr "У вас нет регистраций на игры."
+msgstr "У вас нет зарегистрированных игр."
+
+#: bot/user/user_handlers.py:188
+msgid "Your club card is active until {date}."
+msgstr "Ваша клубная карта активна до {date}."
+
+#: bot/user/user_handlers.py:192
+msgid "Your club card is not active."
+msgstr "Ваша клубная карта не активна."
+
+#: bot/user/user_handlers.py:195
+msgid "To activate or extend your club card, make a payment.\n"
+msgstr "Чтобы активировать или продлить клубную карту, совершите платеж.\n"
+
+#: bot/user/user_handlers.py:200
+msgid "Confirm Payment"
+msgstr "Подтвердить платеж"
+
+#: bot/user/user_handlers.py:201
+msgid "Menu"
+msgstr "Меню"
 
 #: laser_tag_admin/views.py:18
 msgid "Welcome to the Bot Administration Panel!"
-msgstr "Добро пожаловать в панель администрирования бота!"
+msgstr "Добро пожаловать в панель управления ботом!"
 
 #: laser_tag_admin/views.py:19
 msgid "Manage your bot users and settings easily."
-msgstr "Легко управляйте пользователями и настройками бота."
+msgstr "Управляйте пользователями и настройками бота легко."
 
 #: laser_tag_admin/views.py:20
 msgid "View Users"
@@ -233,7 +270,7 @@ msgstr "Авторизация"
 
 #: laser_tag_admin/views.py:30
 msgid "Login"
-msgstr "Войти"
+msgstr "Вход"
 
 #: laser_tag_admin/views.py:32
 msgid "You are Logged in"
@@ -242,4 +279,3 @@ msgstr "Вы вошли в систему"
 #: laser_tag_admin/views.py:40
 msgid "You are logged out"
 msgstr "Вы вышли из системы"
-

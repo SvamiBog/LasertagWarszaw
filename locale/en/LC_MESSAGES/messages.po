@@ -6,59 +6,95 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2024-11-14 19:02+0100\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-01 14:11+0100\n"
 "PO-Revision-Date: 2024-11-10 17:18+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language: en\n"
 "Language-Team: en <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.16.0\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: telegram_bot.py:105
+#: bot/handlers/common_handlers.py:32 bot/handlers/common_handlers.py:100
+msgid "Choose your language:"
+msgstr ""
+
+#: bot/handlers/common_handlers.py:44
 msgid "Language has been updated. You have selected the {} language."
 msgstr ""
 
-#: telegram_bot.py:133
-msgid "Share your phone number"
-msgstr ""
-
-#: telegram_bot.py:139
-msgid "Please share your phone number so we can register you."
-msgstr ""
-
-#: bot/admin/admin_handlers.py:52 bot/admin/admin_handlers.py:121
-#: bot/admin/admin_handlers.py:152 bot/user/user_handlers.py:52
-#: bot/user/user_handlers.py:76 bot/user/user_handlers.py:106
-#: bot/user/user_handlers.py:125 bot/user/user_handlers.py:158
-#: bot/user/user_handlers.py:186 telegram_bot.py:154
-msgid "Main Menu"
-msgstr ""
-
-#: telegram_bot.py:160
+#: bot/handlers/common_handlers.py:67
 msgid "Thank you! Your phone number has been registered."
 msgstr ""
 
-#: telegram_bot.py:223
-msgid "Please enter the message you want to broadcast to all users:"
-msgstr ""
-
-#: telegram_bot.py:238
+#: bot/handlers/common_handlers.py:116
 msgid "No upcoming games available."
 msgstr ""
 
-#: telegram_bot.py:256
+#: bot/handlers/common_handlers.py:124 bot/user/user_handlers.py:109
+msgid "Subscription status updated."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:137
+msgid "Please enter the message you want to broadcast to all users:"
+msgstr ""
+
+#: bot/handlers/common_handlers.py:146
+msgid "Game info sent to general chat."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:148 bot/admin/admin_handlers.py:129
+#: bot/user/user_handlers.py:118
+msgid "No upcoming games found."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:156
+msgid "You have been registered for the game."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:160 bot/handlers/common_handlers.py:175
+msgid "Game not found."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:163
 msgid "Error during registration."
 msgstr ""
 
-#: telegram_bot.py:265
+#: bot/handlers/common_handlers.py:171
+msgid "You have been unregistered from the game."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:178
 msgid "Error during unregistration."
 msgstr ""
 
-#: bot/admin/admin_handlers.py:32 bot/user/user_handlers.py:23
+#: bot/handlers/common_handlers.py:191
+msgid "Payment confirmed."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:200
+msgid "Unknown command."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:215
+msgid "Sorry, I did not understand that command."
+msgstr ""
+
+#: bot/handlers/common_handlers.py:220
+msgid "Share your phone number"
+msgstr ""
+
+#: bot/handlers/common_handlers.py:224
+msgid "Please share your phone number so we can register you."
+msgstr ""
+
+#: bot/core/menu_utils.py:22 bot/core/menu_utils.py:26
+msgid "Please choose your preferred language:"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:32 bot/user/user_handlers.py:26
 msgid "Open Game"
 msgstr ""
 
@@ -66,148 +102,156 @@ msgstr ""
 msgid "Broadcast Message"
 msgstr ""
 
-#: bot/admin/admin_handlers.py:34 bot/user/user_handlers.py:26
-msgid "Settings"
+#: bot/admin/admin_handlers.py:34
+msgid "Send Game Info to General Chat"
 msgstr ""
 
-#: bot/admin/admin_handlers.py:39 bot/admin/admin_handlers.py:41
-msgid "Admin Menu:"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:51 bot/user/user_handlers.py:51
-msgid "Change Language"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:56
-msgid "Admin Settings Menu:"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:88
-msgid "Announcement sent to subscribed users.\n"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:89
-msgid "Success"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:90
-msgid "Failed"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:94
-msgid "View Game Details"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:95
-msgid "Close"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:120 bot/user/user_handlers.py:124
-msgid "No upcoming games found."
-msgstr ""
-
-#: bot/admin/admin_handlers.py:134 bot/user/user_handlers.py:139
-msgid "Game Details:\n"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:135 bot/user/user_handlers.py:140
-msgid "Date"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:136 bot/user/user_handlers.py:141
-msgid "Start Time"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:137 bot/user/user_handlers.py:142
-msgid "Location"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:138 bot/user/user_handlers.py:143
-msgid "Players count: "
-msgstr ""
-
-#: bot/admin/admin_handlers.py:139 bot/user/user_handlers.py:144
-msgid "Participants List"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:147 bot/user/user_handlers.py:152
-msgid "No participants yet."
-msgstr ""
-
-#: bot/admin/admin_handlers.py:151
-msgid "Send Announcement"
-msgstr ""
-
-#: bot/admin/admin_handlers.py:186
-msgid "Broadcast sent successfully to all subscribed users."
-msgstr ""
-
-#: bot/core/menu_utils.py:22 bot/core/menu_utils.py:26
-msgid "Please choose your preferred language:"
-msgstr ""
-
-#: bot/user/user_handlers.py:24
+#: bot/admin/admin_handlers.py:35 bot/user/user_handlers.py:27
 msgid "Club Card"
 msgstr ""
 
-#: bot/user/user_handlers.py:25
-msgid "General Chat"
+#: bot/admin/admin_handlers.py:36 bot/user/user_handlers.py:29
+msgid "Settings"
 msgstr ""
 
-#: bot/user/user_handlers.py:30
-msgid "User Menu:"
+#: bot/admin/admin_handlers.py:42 bot/admin/admin_handlers.py:47
+#: bot/admin/admin_handlers.py:53
+msgid "Admin Menu:"
 msgstr ""
 
-#: bot/user/user_handlers.py:37
-msgid "Message not changed, skipping edit."
+#: bot/admin/admin_handlers.py:61 bot/user/user_handlers.py:55
+msgid "Change Language"
 msgstr ""
 
-#: bot/user/user_handlers.py:50
-msgid "Subscription Status"
+#: bot/admin/admin_handlers.py:62 bot/admin/admin_handlers.py:130
+#: bot/admin/admin_handlers.py:148 bot/admin/admin_handlers.py:209
+#: bot/user/user_handlers.py:56 bot/user/user_handlers.py:80
+#: bot/user/user_handlers.py:103 bot/user/user_handlers.py:121
+#: bot/user/user_handlers.py:145 bot/user/user_handlers.py:169
+msgid "Main Menu"
 msgstr ""
 
-#: bot/user/user_handlers.py:58 bot/user/user_handlers.py:60
-msgid "User Settings menu:"
+#: bot/admin/admin_handlers.py:65
+msgid "Admin Settings Menu:"
 msgstr ""
 
-#: bot/user/user_handlers.py:69 bot/user/user_handlers.py:100
-msgid "Enabled"
-msgstr ""
-
-#: bot/user/user_handlers.py:69 bot/user/user_handlers.py:100
-msgid "Disabled"
-msgstr ""
-
-#: bot/user/user_handlers.py:71 bot/user/user_handlers.py:101
-msgid "Subscription status"
-msgstr ""
-
-#: bot/user/user_handlers.py:75 bot/user/user_handlers.py:105
-msgid "Toggle Subscription"
-msgstr ""
-
-#: bot/user/user_handlers.py:84
-msgid "No changes were made to the message."
-msgstr ""
-
-#: bot/user/user_handlers.py:112
-msgid "Subscription status updated."
-msgstr ""
-
-#: bot/user/user_handlers.py:156
+#: bot/admin/admin_handlers.py:82 bot/admin/admin_handlers.py:187
+#: bot/user/user_handlers.py:140
 msgid "Register for Game"
 msgstr ""
 
-#: bot/user/user_handlers.py:157
+#: bot/admin/admin_handlers.py:83 bot/admin/admin_handlers.py:188
+#: bot/user/user_handlers.py:141
 msgid "Unregister from Game"
 msgstr ""
 
-#: bot/user/user_handlers.py:190
+#: bot/admin/admin_handlers.py:98
+msgid "Announcement sent to subscribed users.\n"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:103
+msgid "View Game Details"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:104
+msgid "Close"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:147
+msgid "Send Announcement"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:178
+msgid "Broadcast sent successfully to all users."
+msgstr ""
+
+#: bot/admin/admin_handlers.py:203
+msgid "Active club card users:\n"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:207
+msgid "No active club card users."
+msgstr ""
+
+#: bot/admin/admin_handlers.py:224 bot/user/user_handlers.py:217
+msgid "Game Details:\n"
+msgstr ""
+
+#: bot/admin/admin_handlers.py:229 bot/user/user_handlers.py:222
+msgid "Players count: "
+msgstr ""
+
+#: bot/admin/admin_handlers.py:237 bot/user/user_handlers.py:230
+msgid "No participants yet."
+msgstr ""
+
+#: bot/user/user_handlers.py:28
+msgid "General Chat"
+msgstr ""
+
+#: bot/user/user_handlers.py:33
+msgid "User Menu:"
+msgstr ""
+
+#: bot/user/user_handlers.py:40
+msgid "Message not changed, skipping edit."
+msgstr ""
+
+#: bot/user/user_handlers.py:54
+msgid "Subscription Status"
+msgstr ""
+
+#: bot/user/user_handlers.py:61 bot/user/user_handlers.py:65
+msgid "User Settings menu:"
+msgstr ""
+
+#: bot/user/user_handlers.py:74 bot/user/user_handlers.py:98
+msgid "Enabled"
+msgstr ""
+
+#: bot/user/user_handlers.py:74 bot/user/user_handlers.py:98
+msgid "Disabled"
+msgstr ""
+
+#: bot/user/user_handlers.py:79 bot/user/user_handlers.py:102
+msgid "Toggle Subscription"
+msgstr ""
+
+#: bot/user/user_handlers.py:87
+msgid "No changes were made to the message."
+msgstr ""
+
+#: bot/user/user_handlers.py:152
+msgid "Message is not modified."
+msgstr ""
+
+#: bot/user/user_handlers.py:173
 msgid "Your registered games:"
 msgstr ""
 
-#: bot/user/user_handlers.py:195
+#: bot/user/user_handlers.py:178
 msgid "You have no game registrations."
+msgstr ""
+
+#: bot/user/user_handlers.py:188
+#, python-brace-format
+msgid "Your club card is active until {date}."
+msgstr ""
+
+#: bot/user/user_handlers.py:192
+msgid "Your club card is not active."
+msgstr ""
+
+#: bot/user/user_handlers.py:195
+msgid "To activate or extend your club card, make a payment.\n"
+msgstr ""
+
+#: bot/user/user_handlers.py:200
+msgid "Confirm Payment"
+msgstr ""
+
+#: bot/user/user_handlers.py:201
+msgid "Menu"
 msgstr ""
 
 #: laser_tag_admin/views.py:18
@@ -237,4 +281,3 @@ msgstr ""
 #: laser_tag_admin/views.py:40
 msgid "You are logged out"
 msgstr ""
-

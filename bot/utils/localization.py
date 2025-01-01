@@ -2,6 +2,11 @@
 
 import gettext
 import os
+import logging
+
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
 
 # Путь к файлам локализации
 LOCALE_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'locale')
@@ -25,8 +30,12 @@ for lang_code in LANGUAGES:
             localedir=LOCALE_DIR,
             languages=[lang_code]
         )
+        logging.info(f"Loaded translation for {lang_code}")
     except FileNotFoundError:
-        # Если файлы перевода не найдены, используем NullTranslations
+        logging.warning(f"Translation file not found for {lang_code}. Using NullTranslations.")
+        translation = gettext.NullTranslations()
+    except Exception as e:
+        logging.error(f"Error loading translation for {lang_code}: {e}")
         translation = gettext.NullTranslations()
     langs[lang_code] = translation
 
