@@ -12,7 +12,7 @@ db_manager = DatabaseManager()
 admin_handler = AdminHandler()
 user_handler = UserHandler()
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 async def start_handler(update: Update, context: CallbackContext):

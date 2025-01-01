@@ -5,9 +5,6 @@ import os
 import logging
 
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
-
 # Путь к файлам локализации
 LOCALE_DIR = os.path.join(os.path.dirname(__file__), '..', '..', 'locale')
 

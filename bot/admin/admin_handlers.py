@@ -14,8 +14,7 @@ from bot.core.database_manager import DatabaseManager
 from asgiref.sync import sync_to_async
 
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class AdminHandler:
     """Класс для обработки действий администратора."""
@@ -24,6 +23,7 @@ class AdminHandler:
     def __init__(self):
         self.db_manager = DatabaseManager()
         self.general_chat_id = os.getenv('GENERAL_CHAT_ID')
+        logger.info("AdminHandler initialized")
 
 
     async def send_admin_menu(self, update: Update, context: CallbackContext, _, query=None) -> None:

@@ -10,6 +10,9 @@ from bot.core.database_manager import DatabaseManager
 
 from asgiref.sync import sync_to_async  # Не забудьте импортировать sync_to_async
 
+
+logger = logging.getLogger(__name__)
+
 class UserHandler:
     """Класс для обработки действий пользователя."""
 
@@ -17,7 +20,7 @@ class UserHandler:
         self.db_manager = DatabaseManager()
         self.general_chat_url = os.getenv('GENERAL_CHAT_URL', 'https://t.me/lasertawarsaw')
         self.payment_details = os.getenv('PAYMENT_DETAILS')
-        logging.basicConfig(level=logging.INFO)
+        logger.info("UserHandler initialized")
 
 
     async def send_user_menu(self, update: Update, context: CallbackContext, _, query=None) -> None:

@@ -1,3 +1,4 @@
+import logging
 import os
 import django
 from django.utils import timezone
@@ -14,11 +15,14 @@ django.setup()
 from laser_tag_admin.users.models import User
 from laser_tag_admin.games.models import Game, GameRegistration
 
+
+logger = logging.getLogger(__name__)
+
 class DatabaseManager:
     """Класс для управления операциями с базой данных."""
 
     def __init__(self):
-        pass  # Конструктор может быть расширен при необходимости
+        logger.info("DatabaseManager initialized")
 
 
     def async_db_method(func):

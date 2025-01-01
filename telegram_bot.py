@@ -31,8 +31,6 @@ from bot.handlers.common_handlers import (
 from bot.core.database_manager import DatabaseManager
 from logging_config import setup_logging
 
-# Настройка логирования
-logging.basicConfig(level=logging.INFO)
 
 # Загрузка переменных окружения
 load_dotenv()
@@ -62,6 +60,7 @@ if __name__ == '__main__':
 
     # Настройка логирования
     setup_logging()
+    asyncio.run(main())
 
     # Запуск основного цикла бота
     loop = asyncio.get_event_loop()
